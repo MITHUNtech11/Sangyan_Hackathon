@@ -72,3 +72,16 @@ export async function fetchTestCases(): Promise<TestCaseItem[]> {
   return res.json();
 }
 
+export async function fetchRegulatoryAdvisories(): Promise<import('./types').RegulatoryAdvisory[]> {
+  const res = await fetch(`${API_BASE}/regulatory-advisories`);
+  if (!res.ok) throw new Error('Failed to fetch regulatory advisories');
+  return res.json();
+}
+
+export async function fetchModusOperandi(): Promise<import('./types').ModusOperandiItem[]> {
+  const res = await fetch(`${API_BASE}/modus-operandi`);
+  if (!res.ok) throw new Error('Failed to fetch modus operandi');
+  return res.json();
+}
+
+

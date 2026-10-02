@@ -6,6 +6,7 @@ import { AnalyzingOverlay } from './components/AnalyzingOverlay';
 import { ResultView } from './components/ResultView';
 import { DemoPage } from './components/DemoPage';
 import { LessonsPage } from './components/LessonsPage';
+import { RegulatoryWatchPage } from './components/RegulatoryWatchPage';
 import type {
   AnalysisResult,
   DemoSample,
@@ -157,6 +158,8 @@ export const App: React.FC = () => {
           />
         ) : currentView === 'lessons' ? (
           <LessonsPage onBackToAnalyzer={() => handleNavigate('analyzer')} />
+        ) : currentView === 'regulatory' ? (
+          <RegulatoryWatchPage onBackToAnalyzer={() => handleNavigate('analyzer')} />
         ) : (
           <div>
             {/* Hero Section */}

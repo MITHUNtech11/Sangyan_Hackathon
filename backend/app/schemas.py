@@ -109,6 +109,37 @@ class MicroLesson(BaseModel):
     )
 
 
+class RegulatoryAdvisory(BaseModel):
+    id: str
+    authority: str = Field(..., description="SEBI or NSDL")
+    reference_no: str = Field(..., description="Circular/Press Release No.")
+    date: str
+    title: str
+    platform: str = Field(..., description="whatsapp, telegram, youtube, or general")
+    summary: str
+    key_red_flags: List[str] = Field(default_factory=list)
+    official_action_advice: str
+    source_url: str
+
+
+class ModusOperandiItem(BaseModel):
+    id: str
+    platform: str
+    tactic_name: str
+    description: str
+    how_it_works: List[str] = Field(default_factory=list)
+    regulatory_precedent: str
+    how_investor_protects: str
+
+
+class RegulatoryGrounding(BaseModel):
+    platform_detected: Optional[str] = None
+    modus_operandi_title: Optional[str] = None
+    modus_operandi_description: Optional[str] = None
+    matched_advisories: List[RegulatoryAdvisory] = Field(default_factory=list)
+    official_redressal_steps: List[str] = Field(default_factory=list)
+
+
 class AnalysisResult(BaseModel):
     id: str = Field(..., description="Unique analysis identifier.")
     input_type: str = Field(..., description="Input method: image, text, or url.")
@@ -121,6 +152,10 @@ class AnalysisResult(BaseModel):
     signals: List[WarningSignal] = Field(default_factory=list, description="Detected warning and manipulation signals.")
     intent_breakdown: Optional[IntentBreakdown] = Field(default=None, description="Promotion vs Education breakdown.")
     sebi_check: Optional[SebiCheckResult] = Field(default=None, description="Regulatory registration check.")
+    regulatory_grounding: Optional[RegulatoryGrounding] = Field(
+        default=None,
+        description="Cross-referenced official SEBI & NSDL regulatory advisories and modus operandi."
+    )
     simple_explanation: SimpleExplanation = Field(..., description="Simple multi-lingual breakdown.")
     verification_items: List[str] = Field(default_factory=list, description="Checklist questions to verify before acting.")
     before_you_act: str = Field(..., description="Urgent precautionary instruction.")

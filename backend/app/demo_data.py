@@ -21,6 +21,7 @@ from .schemas import (
 from .lessons import LESSONS_DB
 from .multilingual import build_multilingual_explanation
 from .classifier import inspect_sebi_registration, classify_intent_and_evidence
+from .datasets.sebi_nsdl_advisories import match_regulatory_grounding
 
 
 DEMO_SAMPLES: List[DemoSample] = [
@@ -628,6 +629,7 @@ def build_analysis_result_from_test_case(tc: Dict, input_type: str = "text") -> 
     intent, evaluated_claims = classify_intent_and_evidence(
         tc["content"], tc["expected_status"], tc["signals"], list(tc["claims"])
     )
+    reg_grounding = match_regulatory_grounding(tc["content"])
 
     return AnalysisResult(
         id=f"analysis-{tc['id']}",
@@ -641,6 +643,7 @@ def build_analysis_result_from_test_case(tc: Dict, input_type: str = "text") -> 
         signals=tc["signals"],
         intent_breakdown=intent,
         sebi_check=sebi_res,
+        regulatory_grounding=reg_grounding,
         simple_explanation=expl,
         verification_items=tc["verification_items"],
         before_you_act=tc["before_you_act"],

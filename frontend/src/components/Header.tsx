@@ -7,6 +7,7 @@ import {
   Search,
   Sparkles,
   BookOpen,
+  Building2,
 } from 'lucide-react';
 import type { SupportedLanguage, NavigationView } from '../types';
 import { SUPPORTED_LANGUAGES, getLanguageByCode } from '../i18n/languages';
@@ -102,6 +103,17 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <BookOpen className="w-3.5 h-3.5 text-indigo-500" />
             <span>Micro-Lessons</span>
+          </button>
+          <button
+            onClick={() => onNavigate('regulatory')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer ${
+              currentView === 'regulatory'
+                ? 'bg-white text-sky-700 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+            }`}
+          >
+            <Building2 className="w-3.5 h-3.5 text-emerald-600" />
+            <span>SEBI & NSDL Watch</span>
           </button>
         </nav>
 
@@ -213,6 +225,17 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
           <span>Lessons</span>
+        </button>
+        <button
+          onClick={() => onNavigate('regulatory')}
+          className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center space-x-1 cursor-pointer ${
+            currentView === 'regulatory'
+              ? 'bg-sky-600 text-white shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          <Building2 className="w-3.5 h-3.5 text-emerald-400" />
+          <span>SEBI/NSDL</span>
         </button>
       </div>
     </header>

@@ -44,6 +44,7 @@ from .prompts import (
 from .demo_data import TEST_CASES_DATA, build_analysis_result_from_test_case
 from .multilingual import build_multilingual_explanation
 from .classifier import inspect_sebi_registration, classify_intent_and_evidence
+from .datasets.sebi_nsdl_advisories import match_regulatory_grounding
 
 # Load environment variables
 load_dotenv()
@@ -238,6 +239,7 @@ class AnalysisEngine:
         intent, formatted_claims = classify_intent_and_evidence(
             content, overall_status_val, formatted_signals, formatted_claims
         )
+        reg_grounding = match_regulatory_grounding(content)
 
         return AnalysisResult(
             id=f"analysis-{uuid.uuid4().hex[:8]}",
@@ -251,6 +253,7 @@ class AnalysisEngine:
             signals=formatted_signals,
             intent_breakdown=intent,
             sebi_check=sebi_res,
+            regulatory_grounding=reg_grounding,
             simple_explanation=multilingual_expl,
             verification_items=synthesis.get("verification_items", [
                 "Is the organisation genuine?",
@@ -387,6 +390,7 @@ class AnalysisEngine:
         # SANGYAN Track E: Promotion vs Education intent and claim evidence evaluation
         sebi_res = inspect_sebi_registration(content)
         intent, claims = classify_intent_and_evidence(content, overall_status, signals, claims)
+        reg_grounding = match_regulatory_grounding(content)
 
         return AnalysisResult(
             id=f"analysis-{uuid.uuid4().hex[:8]}",
@@ -400,6 +404,7 @@ class AnalysisEngine:
             signals=signals,
             intent_breakdown=intent,
             sebi_check=sebi_res,
+            regulatory_grounding=reg_grounding,
             simple_explanation=simple_expl,
             verification_items=[
                 "Is the organisation genuine and registered with SEBI or RBI?",

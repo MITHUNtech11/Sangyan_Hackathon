@@ -38,6 +38,29 @@ async def test_test_cases_endpoint(async_client: AsyncClient):
     assert any(c["id"] == "tc-4" for c in cases)
 
 
+@pytest.mark.asyncio
+async def test_regulatory_advisories_and_modus_operandi_endpoints(async_client: AsyncClient):
+    """Test /api/regulatory-advisories and /api/modus-operandi return official SEBI/NSDL datasets."""
+    # 1. Advisories
+    resp_adv = await async_client.get("/api/regulatory-advisories")
+    assert resp_adv.status_code == 200
+    advisories = resp_adv.json()
+    assert len(advisories) >= 5
+    assert any(a["authority"] == "SEBI" for a in advisories)
+    assert any(a["authority"] == "NSDL" for a in advisories)
+    assert any(a["platform"] in ["whatsapp", "telegram", "youtube"] for a in advisories)
+
+    # 2. Modus Operandi
+    resp_mo = await async_client.get("/api/modus-operandi")
+    assert resp_mo.status_code == 200
+    mo_items = resp_mo.json()
+    assert len(mo_items) >= 4
+    assert any(m["platform"] == "whatsapp" for m in mo_items)
+    assert any(m["platform"] == "telegram" for m in mo_items)
+    assert any(m["platform"] == "youtube" for m in mo_items)
+
+
+
 
 @pytest.mark.asyncio
 async def test_analyze_text_endpoint(async_client: AsyncClient):

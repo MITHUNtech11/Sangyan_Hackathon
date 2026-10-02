@@ -6,6 +6,10 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Poppins', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+        poppins: ['Poppins', 'sans-serif'],
+      },
       colors: {
         brand: {
           50: '#f0f9ff',

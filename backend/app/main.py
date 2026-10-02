@@ -91,6 +91,21 @@ async def get_all_test_cases():
     return cases
 
 
+@app.get("/api/regulatory-advisories")
+async def get_regulatory_advisories():
+    """Return master database of official SEBI & NSDL advisories, circulars, and caution press releases."""
+    from .datasets.sebi_nsdl_advisories import OFFICIAL_ADVISORIES
+    return OFFICIAL_ADVISORIES
+
+
+@app.get("/api/modus-operandi")
+async def get_modus_operandi():
+    """Return curated scam modus operandi database across WhatsApp, Telegram, and YouTube."""
+    from .datasets.sebi_nsdl_advisories import PLATFORM_MODUS_OPERANDI
+    return PLATFORM_MODUS_OPERANDI
+
+
+
 
 @app.post("/api/analyze/text", response_model=AnalysisResult)
 async def analyze_text_endpoint(payload: TextAnalysisRequest):

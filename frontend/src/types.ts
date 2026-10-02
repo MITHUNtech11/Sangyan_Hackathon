@@ -82,6 +82,7 @@ export interface AnalysisResult {
   signals: WarningSignal[];
   intent_breakdown?: IntentBreakdown | null;
   sebi_check?: SebiCheckResult | null;
+  regulatory_grounding?: RegulatoryGrounding | null;
   simple_explanation: SimpleExplanation;
   verification_items: string[];
   before_you_act: string;
@@ -100,7 +101,7 @@ export interface DemoSample {
   expected_status: OverallStatus;
 }
 
-export type NavigationView = 'analyzer' | 'demos' | 'lessons';
+export type NavigationView = 'analyzer' | 'demos' | 'lessons' | 'regulatory';
 
 export interface TestCaseItem {
   id: string;
@@ -113,4 +114,36 @@ export interface TestCaseItem {
   signals_count?: number;
   micro_lesson_topic?: string;
 }
+
+export interface RegulatoryAdvisory {
+  id: string;
+  authority: string;
+  reference_no: string;
+  date: string;
+  title: string;
+  platform: string;
+  summary: string;
+  key_red_flags: string[];
+  official_action_advice: string;
+  source_url: string;
+}
+
+export interface ModusOperandiItem {
+  id: string;
+  platform: string;
+  tactic_name: string;
+  description: string;
+  how_it_works: string[];
+  regulatory_precedent: string;
+  how_investor_protects: string;
+}
+
+export interface RegulatoryGrounding {
+  platform_detected?: string | null;
+  modus_operandi_title?: string | null;
+  modus_operandi_description?: string | null;
+  matched_advisories?: RegulatoryAdvisory[];
+  official_redressal_steps?: string[];
+}
+
 
