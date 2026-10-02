@@ -19,6 +19,8 @@ from .schemas import (
     DemoSample,
 )
 from .lessons import LESSONS_DB
+from .multilingual import build_multilingual_explanation
+from .classifier import inspect_sebi_registration, classify_intent_and_evidence
 
 
 DEMO_SAMPLES: List[DemoSample] = [
@@ -612,6 +614,20 @@ def get_test_case_by_id(test_id: str) -> Dict:
 def build_analysis_result_from_test_case(tc: Dict, input_type: str = "text") -> AnalysisResult:
     """Construct a full AnalysisResult Pydantic object from a test case dictionary."""
     lesson = LESSONS_DB.get(tc.get("micro_lesson_topic", "general"), LESSONS_DB["general"])
+    expl = tc["simple_explanation"]
+    if not expl.translations:
+        expl = build_multilingual_explanation(
+            status=tc["expected_status"],
+            en_override=expl.en,
+            ta_override=expl.ta,
+            key_takeaway_override=expl.key_takeaway
+        )
+
+    # SANGYAN Track E: Promotion vs Education classifier and SEBI verification
+    sebi_res = inspect_sebi_registration(tc["content"])
+    intent, evaluated_claims = classify_intent_and_evidence(
+        tc["content"], tc["expected_status"], tc["signals"], list(tc["claims"])
+    )
 
     return AnalysisResult(
         id=f"analysis-{tc['id']}",
@@ -621,9 +637,11 @@ def build_analysis_result_from_test_case(tc: Dict, input_type: str = "text") -> 
         status_label=tc["status_label"],
         summary=tc["summary"],
         warning_signals_count=len(tc["signals"]),
-        claims=tc["claims"],
+        claims=evaluated_claims,
         signals=tc["signals"],
-        simple_explanation=tc["simple_explanation"],
+        intent_breakdown=intent,
+        sebi_check=sebi_res,
+        simple_explanation=expl,
         verification_items=tc["verification_items"],
         before_you_act=tc["before_you_act"],
         micro_lesson=lesson,

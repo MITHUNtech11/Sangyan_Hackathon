@@ -1,29 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Loader2, CheckCircle, CircleDot } from 'lucide-react';
+import type { SupportedLanguage } from '../types';
+import { TRANSLATIONS } from '../i18n/translations';
 
 interface AnalyzingOverlayProps {
-  currentLang: 'en' | 'ta';
+  currentLang: SupportedLanguage;
 }
 
 export const AnalyzingOverlay: React.FC<AnalyzingOverlayProps> = ({ currentLang }) => {
   const [progress, setProgress] = useState(15);
   const [step, setStep] = useState(0);
 
-  const stepsEn = [
-    'Reading content & text extraction...',
-    'Identifying financial claims...',
-    'Checking warning signals & red flags...',
-    'Preparing simple explanation & verification checklist...',
-  ];
+  const t = TRANSLATIONS[currentLang]?.overlay || TRANSLATIONS.en.overlay;
 
-  const stepsTa = [
-    'செய்தியின் வரிகளை வாசிக்கிறது...',
-    'நிதி சார்ந்த வாக்குறுதிகளை அடையாளம் காண்கிறது...',
-    'எச்சரிக்கை அறிகுறிகள் மற்றும் அபாயங்களை சோதிக்கிறது...',
-    'எளிய விளக்கம் மற்றும் சரிபார்ப்பு வழிகளை தயார் செய்கிறது...',
-  ];
-
-  const currentSteps = currentLang === 'ta' ? stepsTa : stepsEn;
+  const currentSteps = [t.step1, t.step2, t.step3, t.step4];
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -55,12 +45,10 @@ export const AnalyzingOverlay: React.FC<AnalyzingOverlayProps> = ({ currentLang 
       </div>
 
       <h3 className="text-xl font-bold text-slate-900 mb-2">
-        {currentLang === 'ta' ? 'உள்ளடக்கம் ஆராயப்படுகிறது...' : 'Analyzing content...'}
+        {t.analyzingTitle}
       </h3>
       <p className="text-xs text-slate-500 mb-6">
-        {currentLang === 'ta'
-          ? 'முதலீட்டாளர் பாதுகாப்பு நெறிமுறைகளுடன் பகுப்பாய்வு செய்யப்படுகிறது'
-          : 'Processing claims against investor protection safeguards'}
+        {t.analyzingSubtitle}
       </p>
 
       {/* Checklist items */}
@@ -100,8 +88,10 @@ export const AnalyzingOverlay: React.FC<AnalyzingOverlayProps> = ({ currentLang 
           style={{ width: `${progress}%` }}
         />
       </div>
-      <div className="text-right text-xs font-bold text-slate-500">
-        {progress}%
+
+      <div className="flex justify-between items-center text-xs text-slate-400 font-mono">
+        <span>Processing</span>
+        <span>{progress}%</span>
       </div>
     </div>
   );

@@ -121,3 +121,32 @@ async def test_lessons_endpoints(async_client: AsyncClient):
     topic_resp = await async_client.get("/api/lessons/guaranteed_returns")
     assert topic_resp.status_code == 200
     assert topic_resp.json()["topic"] == "Guaranteed Returns"
+
+
+@pytest.mark.asyncio
+async def test_multilingual_support(async_client: AsyncClient):
+    """Test analysis returns translations for top 10 Indian languages."""
+    payload = {
+        "text": "Guaranteed 40% monthly returns. Pay ₹5,000 today to activate your account.",
+        "language": "hi"
+    }
+    resp = await async_client.post("/api/analyze/text", json=payload)
+    assert resp.status_code == 200
+    data = resp.json()
+    simple_expl = data["simple_explanation"]
+    assert "translations" in simple_expl
+    translations = simple_expl["translations"]
+
+    # Verify presence of top Indian languages
+    for lang_code in ["hi", "bn", "mr", "te", "ta", "gu", "ur", "kn", "or", "ml", "en"]:
+        assert lang_code in translations, f"Missing language code {lang_code}"
+        assert len(translations[lang_code]) > 10, f"Translation for {lang_code} is too short"
+
+    # Test translate endpoint for Hindi and Bengali
+    hi_trans = await async_client.post("/api/translate", json={"text": payload["text"], "target_language": "hi"})
+    assert hi_trans.status_code == 200
+    assert len(hi_trans.json()["translated"]) > 10
+
+    bn_trans = await async_client.post("/api/translate", json={"text": payload["text"], "target_language": "bn"})
+    assert bn_trans.status_code == 200
+    assert len(bn_trans.json()["translated"]) > 10

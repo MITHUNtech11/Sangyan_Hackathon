@@ -104,6 +104,7 @@ RULES:
    - `en`: Explain in clear, 5th-grade English what the message is saying and why one should be careful. Zero jargon.
    - `ta`: Provide a clean, natural Tamil translation of the explanation (எளிய தமிழில் தெளிவான விளக்கம்).
    - `key_takeaway`: 1 memorable rule of thumb.
+   - `translations`: A dictionary containing natural, conversational translations in major Indian languages (hi, bn, mr, te, ta, gu, ur, kn, or, ml).
 5. Create `verification_items`: 3-5 specific questions the user should investigate (e.g. "Is the entity registered on sebi.gov.in?", "Does their official website mention this scheme?").
 6. Provide `before_you_act`: Immediate safety directive (e.g., "Do not transfer money via personal UPI or share OTPs before independent verification.").
 7. State `uncertainty`: 1-3 bullet points acknowledging what this AI cannot verify from this text alone (e.g., "The system cannot determine if the company actually exists without external regulatory lookup.").
@@ -116,7 +117,19 @@ Return as a valid JSON object:
   "simple_explanation": {
     "en": "string",
     "ta": "string",
-    "key_takeaway": "string"
+    "key_takeaway": "string",
+    "translations": {
+      "hi": "string",
+      "bn": "string",
+      "mr": "string",
+      "te": "string",
+      "ta": "string",
+      "gu": "string",
+      "ur": "string",
+      "kn": "string",
+      "or": "string",
+      "ml": "string"
+    }
   },
   "verification_items": ["string"],
   "before_you_act": "string",

@@ -1,8 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { Upload, FileText, Link2, Image as ImageIcon, X, ArrowRight, ShieldCheck } from 'lucide-react';
+import type { SupportedLanguage } from '../types';
+import { TRANSLATIONS } from '../i18n/translations';
 
 interface InputSectionProps {
-  currentLang: 'en' | 'ta';
+  currentLang: SupportedLanguage;
   onAnalyzeText: (text: string) => void;
   onAnalyzeImage: (file: File) => void;
   onAnalyzeUrl: (url: string) => void;
@@ -23,6 +25,8 @@ export const InputSection: React.FC<InputSectionProps> = ({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const t = TRANSLATIONS[currentLang]?.input || TRANSLATIONS.en.input;
 
   const handleFileSelect = (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -73,7 +77,7 @@ export const InputSection: React.FC<InputSectionProps> = ({
           }`}
         >
           <Upload className="w-4 h-4" />
-          <span>{currentLang === 'ta' ? 'திரைக்காட்சி பதிவேற்றவும்' : 'Upload Screenshot'}</span>
+          <span>{t.tabScreenshot}</span>
         </button>
 
         <button
@@ -85,7 +89,7 @@ export const InputSection: React.FC<InputSectionProps> = ({
           }`}
         >
           <FileText className="w-4 h-4" />
-          <span>{currentLang === 'ta' ? 'உரையை ஒட்டவும்' : 'Paste Text'}</span>
+          <span>{t.tabText}</span>
         </button>
 
         <button
@@ -97,7 +101,7 @@ export const InputSection: React.FC<InputSectionProps> = ({
           }`}
         >
           <Link2 className="w-4 h-4" />
-          <span>{currentLang === 'ta' ? 'இணைப்பை சரிபார்க்கவும்' : 'Check a URL'}</span>
+          <span>{t.tabUrl}</span>
         </button>
       </div>
 
@@ -131,17 +135,13 @@ export const InputSection: React.FC<InputSectionProps> = ({
                   <ImageIcon className="w-7 h-7" />
                 </div>
                 <h4 className="text-base font-bold text-slate-800 mb-1">
-                  {currentLang === 'ta'
-                    ? 'திரைக்காட்சியை இங்கே இழுத்து விடவும் அல்லது கிளிக் செய்யவும்'
-                    : 'Click or drop a financial screenshot here'}
+                  {t.screenshotTitle}
                 </h4>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  {currentLang === 'ta'
-                    ? 'WhatsApp செய்திகள், Instagram பதிவுகள், Telegram டிப்ஸ், YouTube விளம்பரங்கள்'
-                    : 'WhatsApp messages, Instagram posts, Telegram calls, YouTube claims, or investment ads'}
+                  {t.screenshotSubtitle}
                 </p>
                 <div className="mt-4 inline-flex items-center text-xs font-semibold text-sky-600 bg-sky-50 px-3 py-1.5 rounded-lg border border-sky-100">
-                  PNG, JPG, WebP supported
+                  {t.formats}
                 </div>
               </div>
             ) : (
@@ -183,11 +183,7 @@ export const InputSection: React.FC<InputSectionProps> = ({
               rows={4}
               value={textInput}
               onChange={(e) => setTextInput(e.target.value)}
-              placeholder={
-                currentLang === 'ta'
-                  ? 'உதாரணம்: "மாதம் 30% உத்தரவாத வருமானம். இன்றே ₹5,000 செலுத்தவும்..."'
-                  : 'Paste financial claim, WhatsApp forward, or investment offer here (e.g., "Guaranteed 30% monthly returns. Pay ₹5,000 today...")'
-              }
+              placeholder={t.textPlaceholder}
               className="w-full p-4 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent text-sm text-slate-800 placeholder-slate-400"
             />
             <div className="text-right text-xs text-slate-400 mt-1">
@@ -203,11 +199,13 @@ export const InputSection: React.FC<InputSectionProps> = ({
               type="url"
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
-              placeholder="https://example.com/investment-opportunity"
+              placeholder={t.urlPlaceholder}
               className="w-full p-3.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent text-sm text-slate-800 placeholder-slate-400"
             />
             <p className="text-xs text-slate-500 mt-2">
-              {currentLang === 'ta'
+              {currentLang === 'hi'
+                ? 'सार्वजनिक वित्तीय लेख या पोस्ट का वेब पता दर्ज करें।'
+                : currentLang === 'ta'
                 ? 'நிதி சார்ந்த வலைப்பக்கத்தின் இணைப்பை உள்ளிடவும்.'
                 : 'Enter a public webpage URL containing financial claims or schemes.'}
             </p>
@@ -218,11 +216,7 @@ export const InputSection: React.FC<InputSectionProps> = ({
         <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center space-x-2 text-xs text-slate-500">
             <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>
-              {currentLang === 'ta'
-                ? 'உங்கள் உள்ளடக்கம் பாதுகாப்பாக தற்காலிகமாக மட்டுமே பகுப்பாய்வு செய்யப்படுகிறது.'
-                : 'Your content is processed securely and never stored permanently.'}
-            </span>
+            <span>{t.privacyNotice}</span>
           </div>
 
           <button
@@ -235,7 +229,15 @@ export const InputSection: React.FC<InputSectionProps> = ({
             }
             className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-white font-bold text-sm rounded-xl shadow-md transition-all flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <span>{currentLang === 'ta' ? 'ஆராய்ந்து பார்க்கவும்' : 'Analyze Content'}</span>
+            <span>
+              {isLoading
+                ? t.analyzingBtn
+                : activeTab === 'image'
+                ? t.analyzeScreenshotBtn
+                : activeTab === 'text'
+                ? t.analyzeTextBtn
+                : t.analyzeUrlBtn}
+            </span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>

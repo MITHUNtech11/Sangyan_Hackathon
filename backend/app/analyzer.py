@@ -15,7 +15,7 @@ import json
 import time
 import uuid
 import logging
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Tuple
 
 from dotenv import load_dotenv
 
@@ -29,6 +29,9 @@ from .schemas import (
     WarningSignal,
     SimpleExplanation,
     MicroLesson,
+    EvidenceQuality,
+    IntentBreakdown,
+    SebiCheckResult,
 )
 from .taxonomy import TAXONOMY
 from .lessons import get_lesson_for_signal, LESSONS_DB
@@ -39,6 +42,8 @@ from .prompts import (
     STAGE3_EXPLANATION_PROMPT,
 )
 from .demo_data import TEST_CASES_DATA, build_analysis_result_from_test_case
+from .multilingual import build_multilingual_explanation
+from .classifier import inspect_sebi_registration, classify_intent_and_evidence
 
 # Load environment variables
 load_dotenv()
@@ -217,21 +222,36 @@ class AnalysisEngine:
 
         elapsed = int((time.time() - start_time) * 1000)
 
+        # Multilingual Simple Explanation
+        raw_expl = synthesis.get("simple_explanation", {})
+        overall_status_val = OverallStatus(synthesis.get("overall_status", "needs_verification"))
+        multilingual_expl = build_multilingual_explanation(
+            status=overall_status_val,
+            en_override=raw_expl.get("en"),
+            ta_override=raw_expl.get("ta"),
+            key_takeaway_override=raw_expl.get("key_takeaway"),
+            custom_translations=raw_expl.get("translations", {})
+        )
+
+        # SANGYAN Track E: Promotion vs Education intent and claim evidence evaluation
+        sebi_res = inspect_sebi_registration(content)
+        intent, formatted_claims = classify_intent_and_evidence(
+            content, overall_status_val, formatted_signals, formatted_claims
+        )
+
         return AnalysisResult(
             id=f"analysis-{uuid.uuid4().hex[:8]}",
             input_type=input_type,
             original_content=content,
-            overall_status=OverallStatus(synthesis.get("overall_status", "needs_verification")),
+            overall_status=overall_status_val,
             status_label=synthesis.get("status_label", "Needs Verification"),
             summary=synthesis.get("summary", "Summary of financial claims in message."),
             warning_signals_count=len(formatted_signals),
             claims=formatted_claims,
             signals=formatted_signals,
-            simple_explanation=SimpleExplanation(
-                en=synthesis.get("simple_explanation", {}).get("en", "Please verify before trusting."),
-                ta=synthesis.get("simple_explanation", {}).get("ta", "முதலீடு செய்யும் முன் சுயமாக சரிபார்க்கவும்."),
-                key_takeaway=synthesis.get("simple_explanation", {}).get("key_takeaway", "Always independently verify high return claims.")
-            ),
+            intent_breakdown=intent,
+            sebi_check=sebi_res,
+            simple_explanation=multilingual_expl,
             verification_items=synthesis.get("verification_items", [
                 "Is the organisation genuine?",
                 "Does the claimed regulatory registration actually exist on sebi.gov.in?",
@@ -361,6 +381,13 @@ class AnalysisEngine:
 
         elapsed = int((time.time() - start_time) * 1000)
 
+        # Multilingual Simple Explanation
+        simple_expl = build_multilingual_explanation(status=overall_status)
+
+        # SANGYAN Track E: Promotion vs Education intent and claim evidence evaluation
+        sebi_res = inspect_sebi_registration(content)
+        intent, claims = classify_intent_and_evidence(content, overall_status, signals, claims)
+
         return AnalysisResult(
             id=f"analysis-{uuid.uuid4().hex[:8]}",
             input_type=input_type,
@@ -371,11 +398,9 @@ class AnalysisEngine:
             warning_signals_count=len(signals),
             claims=claims,
             signals=signals,
-            simple_explanation=SimpleExplanation(
-                en="This content contains financial statements that should be carefully reviewed before you act. Always independently verify registrations and never rush into transfers.",
-                ta="இந்த செய்தி நிதி தொடர்பான தகவல்களைக் கொண்டுள்ளது. எந்தவொரு முடிவும் எடுப்பதற்கு முன், அதிகாரப்பூர்வ வழிகளில் சரிபார்க்கவும்.",
-                key_takeaway="Understand the risk and verify the source before taking any financial action."
-            ),
+            intent_breakdown=intent,
+            sebi_check=sebi_res,
+            simple_explanation=simple_expl,
             verification_items=[
                 "Is the organisation genuine and registered with SEBI or RBI?",
                 "Does the official organisation's website mention this offer?",

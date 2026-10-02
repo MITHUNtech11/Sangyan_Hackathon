@@ -123,3 +123,57 @@ async def test_arbitrary_unseen_text_heuristic():
     assert len(result.claims) > 0
     assert len(result.signals) > 0
     assert len(result.verification_items) > 0
+
+
+@pytest.mark.asyncio
+async def test_sangyan_track_e_sebi_and_intent_features():
+    """Verify Track E additions: Intent breakdown, claim evidence quality, SEBI registration inspection, and analogies."""
+    from app.schemas import EvidenceQuality, ClaimItem, WarningSignal, SeverityLevel
+    from app.classifier import inspect_sebi_registration, classify_intent_and_evidence
+
+    # 1. SEBI Inspector Unit Test
+    sebi_claim_text = "Join our SEBI Approved Telegram Channel! Analyst Reg No: INH000012345. Daily jackpot options call."
+    sebi_res = inspect_sebi_registration(sebi_claim_text)
+    assert sebi_res.has_sebi_mention is True
+    assert sebi_res.claimed_reg_number == "INH000012345"
+    assert sebi_res.is_valid_format is True
+    assert "Research Analyst" in sebi_res.reg_type
+    assert sebi_res.sebi_warning_note is not None
+    assert "Telegram" in sebi_res.sebi_warning_note or "prohibited" in sebi_res.sebi_warning_note
+
+    # 2. Intent Classifier Unit Test
+    test_claim = ClaimItem(
+        claim="Guaranteed 10% monthly returns without risk",
+        category="Returns",
+        why_it_matters="Fraud risk",
+        action="Avoid"
+    )
+    test_signal = WarningSignal(
+        type="guaranteed_return",
+        title="Guaranteed Return Claim",
+        severity=SeverityLevel.HIGH,
+        evidence="10% monthly",
+        explanation="Guaranteed returns violate SEBI regulations."
+    )
+    intent_res, evaluated_claims = classify_intent_and_evidence(
+        content=sebi_claim_text,
+        overall_status=OverallStatus.POTENTIALLY_MISLEADING,
+        signals=[test_signal],
+        claims=[test_claim]
+    )
+    assert intent_res.promotion_score > intent_res.education_score
+    assert "Promotional" in intent_res.intent_label
+    assert evaluated_claims[0].evidence_quality in [EvidenceQuality.NO_EVIDENCE, EvidenceQuality.ANECDOTAL_CHERRYPICKED]
+
+    # 3. End-to-End Analyzer Schema Test on Benchmark Case
+    # Case 4 has SEBI advisor impersonation
+    content = "Our SEBI registered advisory team (Reg No: INH000099999) offers exclusive guaranteed options tips on Telegram. Message +91-9876543210 to subscribe for ₹9,999/month."
+    analysis = await analyzer.analyze_text(content)
+    assert analysis.intent_breakdown is not None
+    assert "Promotional" in analysis.intent_breakdown.intent_label
+    assert analysis.sebi_check is not None
+    assert analysis.sebi_check.has_sebi_mention is True
+    assert analysis.sebi_check.claimed_reg_number == "INH000099999"
+    assert analysis.micro_lesson.everyday_analogy is not None
+    assert len(analysis.micro_lesson.everyday_analogy) > 10
+

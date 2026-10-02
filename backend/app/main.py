@@ -217,12 +217,16 @@ async def explain_simply(payload: ExplainRequest):
 
 @app.post("/api/translate")
 async def translate_text(payload: TranslateRequest):
-    """Translate text between English and Tamil."""
-    # Fast translation mapping for common UI strings / messages
+    """Translate text between English and top Indian regional languages."""
     res = await analyzer.analyze_text(payload.text)
-    if payload.target_language == "ta":
-        return {"original": payload.text, "translated": res.simple_explanation.ta}
-    return {"original": payload.text, "translated": res.simple_explanation.en}
+    target = payload.target_language.lower()
+    translated = res.simple_explanation.translations.get(target)
+    if not translated:
+        if target == "ta":
+            translated = res.simple_explanation.ta
+        else:
+            translated = res.simple_explanation.en
+    return {"original": payload.text, "target_language": target, "translated": translated}
 
 
 @app.get("/api/lessons", response_model=List[MicroLesson])
