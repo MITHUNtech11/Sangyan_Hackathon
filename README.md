@@ -4,7 +4,6 @@
 > *Nambikkai helps Indian retail investors understand and verify financial content they encounter online—before they trust, share, or act on it.*
 
 **Primary Hackathon Track:** Track E — Misinformation & Content Literacy  
-**Secondary Impact:** Track A — Digital Fraud & Scam Resilience | Track C — Investor Education for Bharat
 
 ---
 
