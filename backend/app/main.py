@@ -72,6 +72,26 @@ async def get_demo_samples():
     return DEMO_SAMPLES
 
 
+@app.get("/api/test-cases")
+async def get_all_test_cases():
+    """Return all 10 benchmark test cases for the interactive Demo Scenarios page."""
+    cases = []
+    for tc in TEST_CASES_DATA:
+        cases.append({
+            "id": tc["id"],
+            "name": tc["name"],
+            "content": tc["content"],
+            "expected_status": tc["expected_status"],
+            "status_label": tc["status_label"],
+            "summary": tc["summary"],
+            "category": tc["claims"][0].category if tc.get("claims") else "General",
+            "signals_count": len(tc.get("signals", [])),
+            "micro_lesson_topic": tc.get("micro_lesson_topic", "general")
+        })
+    return cases
+
+
+
 @app.post("/api/analyze/text", response_model=AnalysisResult)
 async def analyze_text_endpoint(payload: TextAnalysisRequest):
     """Analyze pasted financial content text."""

@@ -4,7 +4,14 @@ import { DemoBar } from './components/DemoBar';
 import { InputSection } from './components/InputSection';
 import { AnalyzingOverlay } from './components/AnalyzingOverlay';
 import { ResultView } from './components/ResultView';
-import type { AnalysisResult, DemoSample, SupportedLanguage } from './types';
+import { DemoPage } from './components/DemoPage';
+import { LessonsPage } from './components/LessonsPage';
+import type {
+  AnalysisResult,
+  DemoSample,
+  SupportedLanguage,
+  NavigationView,
+} from './types';
 import {
   fetchDemoSamples,
   analyzeText,
@@ -17,6 +24,8 @@ import { TRANSLATIONS } from './i18n/translations';
 
 export const App: React.FC = () => {
   const [currentLang, setCurrentLang] = useState<SupportedLanguage>('en');
+  const [currentView, setCurrentView] = useState<NavigationView>('analyzer');
+  const [returnView, setReturnView] = useState<'analyzer' | 'demos'>('analyzer');
   const [isLoading, setIsLoading] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [demoSamples, setDemoSamples] = useState<DemoSample[]>([]);
@@ -25,11 +34,19 @@ export const App: React.FC = () => {
   const t = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
 
   useEffect(() => {
-    // Load presentation demo samples
+    // Load presentation demo samples for quick bar
     fetchDemoSamples()
       .then((samples) => setDemoSamples(samples))
       .catch((err) => console.warn('Could not pre-load demo samples:', err));
   }, []);
+
+  const handleNavigate = (view: NavigationView) => {
+    setAnalysisResult(null);
+    setErrorMessage(null);
+    setCurrentView(view);
+    setReturnView(view === 'demos' ? 'demos' : 'analyzer');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleAnalyzeText = async (text: string) => {
     setIsLoading(true);
@@ -37,6 +54,7 @@ export const App: React.FC = () => {
     try {
       const res = await analyzeText(text, currentLang);
       setAnalysisResult(res);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: any) {
       setErrorMessage(err.message || 'Failed to analyze text.');
     } finally {
@@ -50,6 +68,7 @@ export const App: React.FC = () => {
     try {
       const res = await analyzeImage(file, currentLang);
       setAnalysisResult(res);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: any) {
       setErrorMessage(err.message || 'Failed to analyze image screenshot.');
     } finally {
@@ -63,6 +82,7 @@ export const App: React.FC = () => {
     try {
       const res = await analyzeUrl(url, currentLang);
       setAnalysisResult(res);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: any) {
       setErrorMessage(err.message || 'Failed to analyze URL.');
     } finally {
@@ -71,12 +91,20 @@ export const App: React.FC = () => {
   };
 
   const handleSelectSample = (sample: DemoSample) => {
+    setReturnView('analyzer');
     handleAnalyzeText(sample.content);
+  };
+
+  const handleSelectDemoScenario = (content: string) => {
+    setReturnView('demos');
+    handleAnalyzeText(content);
   };
 
   const handleReset = () => {
     setAnalysisResult(null);
     setErrorMessage(null);
+    setCurrentView(returnView);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDelete = async (id: string) => {
@@ -86,18 +114,23 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col selection:bg-sky-100 selection:text-sky-900">
-      {/* Top Navigation with Bharat Multilingual Dropdown */}
-      <Header currentLang={currentLang} onToggleLang={setCurrentLang} />
+      {/* Top Navigation with Bharat Multilingual Dropdown and Nav Links */}
+      <Header
+        currentLang={currentLang}
+        onToggleLang={setCurrentLang}
+        currentView={analysisResult ? 'analyzer' : currentView}
+        onNavigate={handleNavigate}
+      />
 
       {/* Main Container */}
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Error Notification */}
         {errorMessage && (
-          <div className="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-sm flex items-center justify-between">
+          <div className="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-sm flex items-center justify-between animate-in fade-in">
             <span>{errorMessage}</span>
             <button
               onClick={() => setErrorMessage(null)}
-              className="text-xs font-bold underline ml-4"
+              className="text-xs font-bold underline ml-4 cursor-pointer hover:text-rose-950"
             >
               Dismiss
             </button>
@@ -113,7 +146,17 @@ export const App: React.FC = () => {
             onReset={handleReset}
             onDelete={handleDelete}
             currentLang={currentLang}
+            returnView={returnView}
+            onNavigateToDemos={() => handleNavigate('demos')}
           />
+        ) : currentView === 'demos' ? (
+          <DemoPage
+            onSelectContent={handleSelectDemoScenario}
+            onBackToAnalyzer={() => handleNavigate('analyzer')}
+            isLoading={isLoading}
+          />
+        ) : currentView === 'lessons' ? (
+          <LessonsPage onBackToAnalyzer={() => handleNavigate('analyzer')} />
         ) : (
           <div>
             {/* Hero Section */}
@@ -137,6 +180,7 @@ export const App: React.FC = () => {
               samples={demoSamples}
               onSelectSample={handleSelectSample}
               disabled={isLoading}
+              onViewAllDemos={() => handleNavigate('demos')}
             />
 
             {/* Input Section (Upload / Paste / URL) */}

@@ -6,16 +6,27 @@ interface DemoBarProps {
   samples: DemoSample[];
   onSelectSample: (sample: DemoSample) => void;
   disabled?: boolean;
+  onViewAllDemos?: () => void;
 }
 
-export const DemoBar: React.FC<DemoBarProps> = ({ samples, onSelectSample, disabled }) => {
+export const DemoBar: React.FC<DemoBarProps> = ({ samples, onSelectSample, disabled, onViewAllDemos }) => {
   if (!samples || samples.length === 0) return null;
 
   return (
     <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 mb-6">
-      <div className="flex items-center space-x-2 mb-2 text-xs font-semibold text-slate-700 uppercase tracking-wider">
-        <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-        <span>Quick Demo Scenarios (Click to test):</span>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center space-x-2 text-xs font-semibold text-slate-700 uppercase tracking-wider">
+          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+          <span>Quick Demo Scenarios (Click to test):</span>
+        </div>
+        {onViewAllDemos && (
+          <button
+            onClick={onViewAllDemos}
+            className="text-xs font-bold text-sky-600 hover:text-sky-800 transition-colors cursor-pointer flex items-center space-x-1"
+          >
+            <span>View All 10 Scenarios →</span>
+          </button>
+        )}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
         {samples.map((s, idx) => {

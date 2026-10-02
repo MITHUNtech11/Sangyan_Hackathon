@@ -1,4 +1,4 @@
-import type { AnalysisResult, DemoSample, MicroLesson } from './types';
+import type { AnalysisResult, DemoSample, MicroLesson, TestCaseItem } from './types';
 
 const API_BASE = '/api';
 
@@ -65,3 +65,10 @@ export async function fetchLessons(): Promise<MicroLesson[]> {
   if (!res.ok) throw new Error('Failed to fetch lessons');
   return res.json();
 }
+
+export async function fetchTestCases(): Promise<TestCaseItem[]> {
+  const res = await fetch(`${API_BASE}/test-cases`);
+  if (!res.ok) throw new Error('Failed to fetch test cases');
+  return res.json();
+}
+

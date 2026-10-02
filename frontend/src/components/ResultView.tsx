@@ -22,6 +22,8 @@ import {
   Lightbulb,
   PieChart,
   ShoppingCart,
+  ArrowLeft,
+  Sparkles,
 } from 'lucide-react';
 import type { AnalysisResult, SupportedLanguage } from '../types';
 import { SUPPORTED_LANGUAGES, getLanguageByCode } from '../i18n/languages';
@@ -32,6 +34,8 @@ interface ResultViewProps {
   onReset: () => void;
   onDelete: (id: string) => void;
   currentLang: SupportedLanguage;
+  returnView?: 'analyzer' | 'demos';
+  onNavigateToDemos?: () => void;
 }
 
 export const ResultView: React.FC<ResultViewProps> = ({
@@ -39,6 +43,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
   onReset,
   onDelete,
   currentLang,
+  returnView = 'analyzer',
+  onNavigateToDemos,
 }) => {
   // Explanation language state (tracks user selection or defaults to currentLang)
   const [overrideLang, setOverrideLang] = useState<{ global: SupportedLanguage; local: SupportedLanguage }>({
@@ -158,6 +164,36 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
+      {/* Top Breadcrumb Navigation */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={onReset}
+            className="inline-flex items-center space-x-1.5 text-xs font-bold text-slate-700 hover:text-sky-600 transition-colors cursor-pointer group"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+            <span>{returnView === 'demos' ? '← Back to Demo Scenarios' : '← Back to Analyzer'}</span>
+          </button>
+          {onNavigateToDemos && (
+            <>
+              <span className="text-slate-300">|</span>
+              <button
+                onClick={onNavigateToDemos}
+                className="text-xs font-semibold text-slate-500 hover:text-sky-600 transition-colors cursor-pointer"
+              >
+                Explore Other Scenarios (10)
+              </button>
+            </>
+          )}
+        </div>
+
+        <div className="flex items-center space-x-2 text-xs text-slate-400">
+          <span className="font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[11px]">
+            Analysis ID: {result.id}
+          </span>
+        </div>
+      </div>
+
       {/* 1. Status Banner */}
       <div className={`rounded-2xl border-2 p-6 shadow-md ${bannerColor} transition-all`}>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -685,6 +721,35 @@ export const ResultView: React.FC<ResultViewProps> = ({
           )}
         </div>
       )}
+
+      {/* Bottom Navigation & Action Bar */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <button
+            onClick={onReset}
+            className="w-full sm:w-auto px-4 py-2.5 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>{returnView === 'demos' ? 'Return to Demo Scenarios' : 'Analyze Another Piece of Content'}</span>
+          </button>
+          {onNavigateToDemos && (
+            <button
+              onClick={onNavigateToDemos}
+              className="w-full sm:w-auto px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
+            >
+              <Sparkles className="w-4 h-4 text-amber-500" />
+              <span>Explore All 10 Benchmark Scenarios</span>
+            </button>
+          )}
+        </div>
+
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors cursor-pointer py-1"
+        >
+          ↑ Scroll to Top
+        </button>
+      </div>
 
       {/* 11. Uncertainty Limits & Legal Disclaimer */}
       <div className="text-xs text-slate-400 space-y-2 px-2 pb-4">

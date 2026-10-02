@@ -99,3 +99,18 @@ export interface DemoSample {
   content: string;
   expected_status: OverallStatus;
 }
+
+export type NavigationView = 'analyzer' | 'demos' | 'lessons';
+
+export interface TestCaseItem {
+  id: string;
+  name: string;
+  content: string;
+  expected_status: OverallStatus;
+  status_label: string;
+  summary: string;
+  category?: string;
+  signals_count?: number;
+  micro_lesson_topic?: string;
+}
+

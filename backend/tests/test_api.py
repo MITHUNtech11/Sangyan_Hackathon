@@ -28,6 +28,18 @@ async def test_demo_samples_endpoint(async_client: AsyncClient):
 
 
 @pytest.mark.asyncio
+async def test_test_cases_endpoint(async_client: AsyncClient):
+    """Test /api/test-cases returns all 10 curated benchmark test cases."""
+    resp = await async_client.get("/api/test-cases")
+    assert resp.status_code == 200
+    cases = resp.json()
+    assert len(cases) == 10
+    assert any(c["id"] == "tc-1" for c in cases)
+    assert any(c["id"] == "tc-4" for c in cases)
+
+
+
+@pytest.mark.asyncio
 async def test_analyze_text_endpoint(async_client: AsyncClient):
     """Test /api/analyze/text with suspicious text."""
     payload = {

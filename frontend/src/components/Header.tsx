@@ -1,15 +1,30 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Lock, Globe, ChevronDown, Check } from 'lucide-react';
-import type { SupportedLanguage } from '../types';
+import {
+  Lock,
+  Globe,
+  ChevronDown,
+  Check,
+  Search,
+  Sparkles,
+  BookOpen,
+} from 'lucide-react';
+import type { SupportedLanguage, NavigationView } from '../types';
 import { SUPPORTED_LANGUAGES, getLanguageByCode } from '../i18n/languages';
 import { TRANSLATIONS } from '../i18n/translations';
 
 interface HeaderProps {
   currentLang: SupportedLanguage;
   onToggleLang: (lang: SupportedLanguage) => void;
+  currentView: NavigationView;
+  onNavigate: (view: NavigationView) => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ currentLang, onToggleLang }) => {
+export const Header: React.FC<HeaderProps> = ({
+  currentLang,
+  onToggleLang,
+  currentView,
+  onNavigate,
+}) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const activeLangInfo = getLanguageByCode(currentLang);
@@ -28,29 +43,70 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onToggleLang }) => 
 
   return (
     <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
-        {/* Brand & Tagline */}
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center text-white font-black text-xl shadow-md">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-2.5 flex items-center justify-between">
+        {/* Brand & Tagline - Clickable Home Button */}
+        <button
+          onClick={() => onNavigate('analyzer')}
+          className="flex items-center space-x-3 text-left focus:outline-none cursor-pointer group"
+          title="Return to Main Analyzer"
+        >
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center text-white font-black text-xl shadow-md group-hover:scale-105 transition-transform shrink-0">
             ந
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <span className="font-extrabold text-xl tracking-tight text-slate-900">
+              <span className="font-extrabold text-xl tracking-tight text-slate-900 group-hover:text-sky-600 transition-colors">
                 NAMBIKKAI
               </span>
               <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-sky-100 text-sky-800">
                 {activeLangInfo.nativeName}
               </span>
             </div>
-            <p className="text-xs text-slate-500 font-medium hidden sm:block">
+            <p className="text-[11px] text-slate-500 font-medium hidden sm:block">
               {strings.header.tagline}
             </p>
           </div>
-        </div>
+        </button>
+
+        {/* Center: Desktop Navigation Tabs */}
+        <nav className="hidden md:flex items-center space-x-1 bg-slate-100/90 p-1 rounded-xl border border-slate-200/80">
+          <button
+            onClick={() => onNavigate('analyzer')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer ${
+              currentView === 'analyzer'
+                ? 'bg-white text-sky-700 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+            }`}
+          >
+            <Search className="w-3.5 h-3.5" />
+            <span>Analyzer</span>
+          </button>
+          <button
+            onClick={() => onNavigate('demos')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer ${
+              currentView === 'demos'
+                ? 'bg-white text-sky-700 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            <span>Demo Scenarios (10)</span>
+          </button>
+          <button
+            onClick={() => onNavigate('lessons')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer ${
+              currentView === 'lessons'
+                ? 'bg-white text-sky-700 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+            }`}
+          >
+            <BookOpen className="w-3.5 h-3.5 text-indigo-500" />
+            <span>Micro-Lessons</span>
+          </button>
+        </nav>
 
         {/* Right side: Privacy Badge & Language Selector */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 sm:space-x-3">
           {/* Privacy Pill */}
           <div className="hidden lg:flex items-center space-x-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-medium">
             <Lock className="w-3.5 h-3.5 text-emerald-600" />
@@ -61,7 +117,7 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onToggleLang }) => 
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setDropdownOpen((prev) => !prev)}
-              className="flex items-center space-x-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200/80 text-slate-800 border border-slate-300 rounded-xl text-xs font-bold transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="flex items-center space-x-1.5 sm:space-x-2 px-2.5 sm:px-3 py-1.5 bg-slate-100 hover:bg-slate-200/80 text-slate-800 border border-slate-300 rounded-xl text-xs font-bold transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer"
               title="Select Language / भाषा चुनें / மொழியைத் தேர்ந்தெடுக்கவும்"
             >
               <Globe className="w-4 h-4 text-sky-600 shrink-0" />
@@ -69,7 +125,7 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onToggleLang }) => 
                 <span className="text-xs font-extrabold leading-tight text-slate-900">
                   {activeLangInfo.nativeName}
                 </span>
-                <span className="text-[10px] text-slate-500 leading-none">
+                <span className="text-[10px] text-slate-500 leading-none hidden sm:inline">
                   {activeLangInfo.name}
                 </span>
               </div>
@@ -95,7 +151,7 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onToggleLang }) => 
                           onToggleLang(lang.code);
                           setDropdownOpen(false);
                         }}
-                        className={`w-full px-3 py-2 flex items-center justify-between hover:bg-sky-50 transition-colors text-left ${
+                        className={`w-full px-3 py-2 flex items-center justify-between hover:bg-sky-50 transition-colors text-left cursor-pointer ${
                           isSelected ? 'bg-sky-50/70 font-bold' : ''
                         }`}
                       >
@@ -121,6 +177,43 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onToggleLang }) => 
             )}
           </div>
         </div>
+      </div>
+
+      {/* Mobile Sub-Navigation Bar */}
+      <div className="md:hidden border-t border-slate-100 px-4 py-1.5 flex items-center justify-around bg-slate-50/80">
+        <button
+          onClick={() => onNavigate('analyzer')}
+          className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center space-x-1 cursor-pointer ${
+            currentView === 'analyzer'
+              ? 'bg-sky-600 text-white shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          <Search className="w-3.5 h-3.5" />
+          <span>Analyzer</span>
+        </button>
+        <button
+          onClick={() => onNavigate('demos')}
+          className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center space-x-1 cursor-pointer ${
+            currentView === 'demos'
+              ? 'bg-sky-600 text-white shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+          <span>Demos (10)</span>
+        </button>
+        <button
+          onClick={() => onNavigate('lessons')}
+          className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center space-x-1 cursor-pointer ${
+            currentView === 'lessons'
+              ? 'bg-sky-600 text-white shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
+          <span>Lessons</span>
+        </button>
       </div>
     </header>
   );
