@@ -9,6 +9,7 @@ from typing import Dict, List
 from .schemas import (
     AnalysisResult,
     OverallStatus,
+    VerificationVerdict,
     SeverityLevel,
     ClaimType,
     ClaimStatus,
@@ -22,6 +23,8 @@ from .lessons import LESSONS_DB
 from .multilingual import build_multilingual_explanation
 from .classifier import inspect_sebi_registration, classify_intent_and_evidence
 from .datasets.sebi_nsdl_advisories import match_regulatory_grounding
+from .rag.retriever import rag_retriever
+from .url_inspector import inspect_content_urls
 
 
 DEMO_SAMPLES: List[DemoSample] = [
@@ -631,19 +634,38 @@ def build_analysis_result_from_test_case(tc: Dict, input_type: str = "text") -> 
     )
     reg_grounding = match_regulatory_grounding(tc["content"])
 
+    # Hybrid RAG verification and URL inspection
+    url_insp = inspect_content_urls(tc["content"])
+    verified_claims = [rag_retriever.verify_claim(c.claim, context=tc["content"]) for c in evaluated_claims]
+
+    # Map 5-tier authoritative verdict
+    if any(vc.verdict == VerificationVerdict.OUTDATED for vc in verified_claims):
+        verdict = VerificationVerdict.OUTDATED
+    elif tc["expected_status"] == OverallStatus.POTENTIALLY_MISLEADING or (url_insp and url_insp.risk_level == "high"):
+        verdict = VerificationVerdict.FALSE
+    elif tc["expected_status"] == OverallStatus.NEEDS_VERIFICATION:
+        verdict = VerificationVerdict.MISLEADING
+    elif tc["expected_status"] == OverallStatus.NO_OBVIOUS_SIGNALS:
+        verdict = VerificationVerdict.TRUE
+    else:
+        verdict = VerificationVerdict.UNVERIFIED
+
     return AnalysisResult(
         id=f"analysis-{tc['id']}",
         input_type=input_type,
         original_content=tc["content"],
         overall_status=tc["expected_status"],
         status_label=tc["status_label"],
+        verdict=verdict,
         summary=tc["summary"],
         warning_signals_count=len(tc["signals"]),
         claims=evaluated_claims,
+        verified_claims=verified_claims,
         signals=tc["signals"],
         intent_breakdown=intent,
         sebi_check=sebi_res,
         regulatory_grounding=reg_grounding,
+        url_inspection=url_insp,
         simple_explanation=expl,
         verification_items=tc["verification_items"],
         before_you_act=tc["before_you_act"],

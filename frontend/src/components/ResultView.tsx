@@ -4,6 +4,8 @@ import {
   AlertCircle,
   CheckCircle2,
   ShieldAlert,
+  Clock,
+  Smartphone,
   Trash2,
   RotateCcw,
   Languages,
@@ -142,28 +144,55 @@ export const ResultView: React.FC<ResultViewProps> = ({
     }
   };
 
-  // Status-dependent styling
+  // 5-Tier Authoritative Verdict taxonomy
+  const verdict = result.verdict || (
+    result.overall_status === 'no_obvious_signals'
+      ? 'TRUE'
+      : result.overall_status === 'needs_verification'
+      ? 'MISLEADING'
+      : 'FALSE'
+  );
+
   let bannerBg = 'from-rose-50 via-red-50/40 to-white border-rose-200 text-rose-950';
   let badgeBg = 'bg-rose-600 text-white';
   let statusBorder = 'border-rose-300';
-  let StatusIcon = AlertTriangle;
-  let verdictTitle = 'HIGH-RISK FINANCIAL TRAP';
-  let verdictSub = 'Potentially deceptive claims or unregulated commercial solicitation detected.';
+  let StatusIcon = ShieldAlert;
+  let verdictTitle = 'REFUTED / FRAUDULENT SCHEME';
+  let verdictSub = 'Contradicted by official SEBI/RBI regulations or documented scam modus operandi.';
+  let verdictBadgeLabel = 'FALSE';
 
-  if (result.overall_status === 'needs_verification') {
-    bannerBg = 'from-amber-50 via-orange-50/40 to-white border-amber-200 text-amber-950';
-    badgeBg = 'bg-amber-600 text-white';
-    statusBorder = 'border-amber-300';
-    StatusIcon = AlertCircle;
-    verdictTitle = 'NEEDS INDEPENDENT VERIFICATION';
-    verdictSub = 'Contains exaggerated, selective, or unverified claims requiring due diligence.';
-  } else if (result.overall_status === 'no_obvious_signals') {
+  if (verdict === 'TRUE') {
     bannerBg = 'from-emerald-50 via-teal-50/40 to-white border-emerald-200 text-emerald-950';
     badgeBg = 'bg-emerald-600 text-white';
     statusBorder = 'border-emerald-300';
     StatusIcon = CheckCircle2;
-    verdictTitle = 'REGULATED & COMPLIANT CONTENT';
-    verdictSub = 'Standard educational disclosures detected with no obvious manipulative cues.';
+    verdictTitle = 'OFFICIALLY VERIFIED & COMPLIANT';
+    verdictSub = 'Supported by official statutory disclosures and regulatory rules.';
+    verdictBadgeLabel = 'TRUE';
+  } else if (verdict === 'MISLEADING') {
+    bannerBg = 'from-amber-50 via-orange-50/40 to-white border-amber-200 text-amber-950';
+    badgeBg = 'bg-amber-600 text-white';
+    statusBorder = 'border-amber-300';
+    StatusIcon = AlertCircle;
+    verdictTitle = 'MISLEADING / MISSING CONTEXT';
+    verdictSub = 'Omits mandatory risk disclosures or presents selective past performance as safety proof.';
+    verdictBadgeLabel = 'MISLEADING';
+  } else if (verdict === 'OUTDATED') {
+    bannerBg = 'from-purple-50 via-violet-50/40 to-white border-purple-200 text-purple-950';
+    badgeBg = 'bg-purple-600 text-white';
+    statusBorder = 'border-purple-300';
+    StatusIcon = Clock;
+    verdictTitle = 'OUTDATED / LAPSED REGULATION';
+    verdictSub = 'Refers to a discontinued regulatory scheme or interest rate that is no longer active.';
+    verdictBadgeLabel = 'OUTDATED';
+  } else if (verdict === 'UNVERIFIED') {
+    bannerBg = 'from-slate-100 via-slate-50 to-white border-slate-300 text-slate-900';
+    badgeBg = 'bg-slate-700 text-white';
+    statusBorder = 'border-slate-300';
+    StatusIcon = AlertCircle;
+    verdictTitle = 'UNVERIFIED FINANCIAL CLAIM';
+    verdictSub = 'No official SEBI/RBI record directly confirms this claim. Independent due diligence required.';
+    verdictBadgeLabel = 'UNVERIFIED';
   }
 
   const intent = result.intent_breakdown;
@@ -243,10 +272,13 @@ export const ResultView: React.FC<ResultViewProps> = ({
             <div>
               <div className="flex items-center space-x-2">
                 <span className="text-xs font-extrabold uppercase tracking-wider text-slate-600">
-                  VERDICT:
+                  AUTHORITATIVE VERDICT:
                 </span>
                 <span className={`text-xs font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider ${badgeBg}`}>
-                  {result.status_label}
+                  {verdictBadgeLabel}
+                </span>
+                <span className="text-[11px] font-semibold text-slate-500">
+                  ({result.status_label})
                 </span>
               </div>
               <h2 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 mt-0.5">
@@ -355,7 +387,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           }`}
         >
           <FileText className="w-4 h-4 text-indigo-500" />
-          <span>2. Claims & SEBI Check ({result.claims.length})</span>
+          <span>2. Evidence & Verification (RAG) ({(result.verified_claims || result.claims).length})</span>
         </button>
 
         <button
@@ -367,7 +399,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           }`}
         >
           <ListChecks className="w-4 h-4 text-rose-500" />
-          <span>3. Red Flags & Checklist ({result.warning_signals_count})</span>
+          <span>3. Red Flags & Security ({result.warning_signals_count + (result.url_inspection ? 1 : 0)})</span>
         </button>
       </div>
 
@@ -496,6 +528,96 @@ export const ResultView: React.FC<ResultViewProps> = ({
       {/* 4. TAB 2: CLAIMS & SEBI ANALYSIS */}
       {activeTab === 'claims' && (
         <div className="space-y-5 animate-in fade-in duration-150">
+          {/* Hybrid RAG Evidence & Citations Verification Card */}
+          {result.verified_claims && result.verified_claims.length > 0 && (
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+                <div className="flex items-center space-x-2">
+                  <Building2 className="w-5 h-5 text-sky-600" />
+                  <h3 className="text-sm font-black uppercase tracking-wide text-slate-900">
+                    Official Evidence & Regulatory Verification (Hybrid RAG)
+                  </h3>
+                </div>
+                <span className="text-[11px] font-bold text-sky-700 bg-sky-50 border border-sky-100 px-2.5 py-1 rounded-full self-start sm:self-auto">
+                  Grounded against SEBI, RBI, Exchanges & Fin-Fact
+                </span>
+              </div>
+
+              <div className="space-y-4">
+                {result.verified_claims.map((vc, idx) => {
+                  let vColor = 'bg-rose-100 text-rose-800 border-rose-300';
+                  if (vc.verdict === 'TRUE') vColor = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+                  else if (vc.verdict === 'MISLEADING') vColor = 'bg-amber-100 text-amber-800 border-amber-300';
+                  else if (vc.verdict === 'OUTDATED') vColor = 'bg-purple-100 text-purple-800 border-purple-300';
+                  else if (vc.verdict === 'UNVERIFIED') vColor = 'bg-slate-100 text-slate-800 border-slate-300';
+
+                  return (
+                    <div key={idx} className="rounded-xl border border-slate-200 p-4 bg-slate-50/60 space-y-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="text-xs font-bold text-slate-900">
+                          <span className="text-slate-500 mr-1.5">Claim {idx + 1}:</span>
+                          "{vc.claim}"
+                        </div>
+                        <div className="flex items-center space-x-2 shrink-0 self-start sm:self-auto">
+                          <span className={`text-[11px] font-black px-2.5 py-0.5 rounded-full border uppercase ${vColor}`}>
+                            {vc.verdict}
+                          </span>
+                          <span className="text-[10px] font-bold text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200">
+                            {Math.round(vc.confidence * 100)}% Confidence
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="p-3 bg-white rounded-xl border border-slate-200/80 text-xs text-slate-700 leading-relaxed shadow-2xs">
+                        <strong className="text-slate-900 font-bold block mb-1">Grounded Regulatory Rationale:</strong>
+                        {vc.why_verdict}
+                      </div>
+
+                      {vc.retrieved_evidence && vc.retrieved_evidence.length > 0 && (
+                        <div className="space-y-2 pt-1">
+                          <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
+                            Retrieved Official Regulatory Excerpts:
+                          </div>
+                          {vc.retrieved_evidence.map((ev, eIdx) => (
+                            <div key={eIdx} className="bg-sky-50/70 border border-sky-200 rounded-xl p-3 text-xs space-y-1.5">
+                              <div className="flex items-center justify-between">
+                                <span className="font-bold text-sky-950">
+                                  {ev.authority} {ev.reference_no ? `• ${ev.reference_no}` : ''}
+                                </span>
+                                {ev.relevance_score !== undefined && (
+                                  <span className="text-[10px] font-bold text-sky-700 bg-white px-2 py-0.5 rounded border border-sky-200">
+                                    Match: {Math.round(ev.relevance_score * 100)}%
+                                  </span>
+                                )}
+                              </div>
+                              <div className="font-semibold text-slate-800 text-[11px]">{ev.title}</div>
+                              <p className="text-slate-700 text-[11px] italic leading-relaxed">
+                                "{ev.excerpt}"
+                              </p>
+                              {ev.url && (
+                                <div className="pt-1 flex justify-end">
+                                  <a
+                                    href={ev.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center space-x-1 text-[11px] font-bold text-sky-700 hover:text-sky-900 underline"
+                                  >
+                                    <span>View Official Circular</span>
+                                    <ExternalLink className="w-3 h-3" />
+                                  </a>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Official SEBI & NSDL Regulatory Grounding */}
           {result.regulatory_grounding && result.regulatory_grounding.matched_advisories && result.regulatory_grounding.matched_advisories.length > 0 && (
             <div className="bg-gradient-to-br from-indigo-950 via-slate-900 to-sky-950 text-white rounded-2xl p-5 shadow-sm space-y-3.5 border border-indigo-900/60">
@@ -723,6 +845,79 @@ export const ResultView: React.FC<ResultViewProps> = ({
       {/* 5. TAB 3: RED FLAGS & CHECKLIST */}
       {activeTab === 'signals' && (
         <div className="space-y-5 animate-in fade-in duration-150">
+          {/* URL & APK Safety Threat Assessment Card */}
+          {result.url_inspection && (
+            <div className={`rounded-2xl border-2 p-5 shadow-sm space-y-3.5 ${
+              result.url_inspection.risk_level === 'high'
+                ? 'bg-rose-50/80 border-rose-300 text-rose-950'
+                : result.url_inspection.risk_level === 'medium'
+                ? 'bg-amber-50/80 border-amber-300 text-amber-950'
+                : 'bg-emerald-50/80 border-emerald-300 text-emerald-950'
+            }`}>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-black/10">
+                <div className="flex items-center space-x-2">
+                  <Smartphone className="w-5 h-5 text-rose-600" />
+                  <h3 className="text-sm font-black uppercase tracking-wide">
+                    URL & APK Security Threat Assessment
+                  </h3>
+                </div>
+                <span className={`text-[11px] font-extrabold px-3 py-0.5 rounded-full uppercase self-start sm:self-auto ${
+                  result.url_inspection.risk_level === 'high'
+                    ? 'bg-rose-600 text-white'
+                    : result.url_inspection.risk_level === 'medium'
+                    ? 'bg-amber-600 text-white'
+                    : 'bg-emerald-600 text-white'
+                }`}>
+                  {result.url_inspection.risk_level} Risk Rating
+                </span>
+              </div>
+
+              <div className="space-y-2.5 text-xs">
+                <div className="bg-white/90 p-3 rounded-xl border border-slate-200">
+                  <span className="text-slate-400 font-bold block mb-0.5 text-[10px] uppercase">Scanned Link / Destination:</span>
+                  <span className="font-mono font-bold text-slate-900 break-all text-xs">
+                    {result.url_inspection.url}
+                  </span>
+                </div>
+
+                {result.url_inspection.is_apk && (
+                  <div className="p-3.5 bg-rose-600 text-white rounded-xl text-xs font-bold flex items-start space-x-2.5 shadow-sm">
+                    <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-200" />
+                    <div>
+                      <div className="uppercase tracking-wider text-[11px] font-black">Sideloaded APK Download Detected</div>
+                      <p className="font-medium text-[11px] text-white/90 mt-0.5 leading-relaxed">
+                        This link attempts to install an Android APK application outside the official Google Play Store or Apple App Store. Regulators warn that fraudulent apps harvest banking OTPs and screen credentials.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {result.url_inspection.is_impersonating && (
+                  <div className="p-3 bg-rose-100 border border-rose-300 text-rose-950 rounded-xl text-xs font-medium">
+                    <strong className="text-rose-900 font-bold">Typosquatting Alert: </strong> This website mimics official <strong>{result.url_inspection.impersonated_target}</strong> infrastructure to harvest credentials or illicit payments.
+                  </div>
+                )}
+
+                {result.url_inspection.is_shortener && (
+                  <div className="p-3 bg-amber-100 border border-amber-300 text-amber-950 rounded-xl text-xs font-medium">
+                    <strong className="text-amber-900 font-bold">Masked URL / Shortener: </strong> Uses a link redirector ({result.url_inspection.domain}) to conceal the destination domain.
+                  </div>
+                )}
+
+                <div className="p-3 bg-white/90 rounded-xl border border-slate-200 text-xs text-slate-700 leading-relaxed">
+                  <strong className="text-slate-900 font-bold">Security Analysis: </strong> {result.url_inspection.reason}
+                </div>
+
+                {result.url_inspection.redirect_warning && (
+                  <div className="p-2.5 bg-amber-100/80 border border-amber-300 rounded-xl text-[11px] font-bold text-amber-950 flex items-center space-x-2">
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                    <span>Precaution: {result.url_inspection.redirect_warning}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Warning Signals Detected */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
             <div className="flex items-center justify-between mb-4">

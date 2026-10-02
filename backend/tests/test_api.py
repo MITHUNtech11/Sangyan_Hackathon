@@ -185,3 +185,27 @@ async def test_multilingual_support(async_client: AsyncClient):
     bn_trans = await async_client.post("/api/translate", json={"text": payload["text"], "target_language": "bn"})
     assert bn_trans.status_code == 200
     assert len(bn_trans.json()["translated"]) > 10
+
+
+@pytest.mark.asyncio
+async def test_verify_claim_api_endpoint(async_client: AsyncClient):
+    """Test POST /api/verify/claim endpoint."""
+    payload = {"claim": "Guaranteed 40% monthly returns"}
+    resp = await async_client.post("/api/verify/claim", json=payload)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["verdict"] == "FALSE"
+    assert data["confidence"] >= 0.85
+    assert len(data["retrieved_evidence"]) > 0
+
+
+@pytest.mark.asyncio
+async def test_inspect_url_api_endpoint(async_client: AsyncClient):
+    """Test POST /api/inspect/url endpoint."""
+    payload = {"url": "https://sebi-free-bonus.in/trading.apk"}
+    resp = await async_client.post("/api/inspect/url", json=payload)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["is_apk"] is True
+    assert data["is_impersonating"] is True
+    assert data["risk_level"] == "high"

@@ -1,8 +1,40 @@
 export type OverallStatus = 'potentially_misleading' | 'needs_verification' | 'no_obvious_signals';
+export type VerificationVerdict = 'TRUE' | 'FALSE' | 'MISLEADING' | 'UNVERIFIED' | 'OUTDATED';
 export type SeverityLevel = 'high' | 'medium' | 'low';
 export type ClaimType = 'factual' | 'promotional' | 'predictive' | 'opinion';
 export type ClaimStatus = 'needs_verification' | 'unverified' | 'educational' | 'plausible';
 export type EvidenceQuality = 'no_evidence' | 'anecdotal_cherrypicked' | 'audited_filing';
+
+export interface RAGEvidenceDoc {
+  id?: string;
+  title: string;
+  authority: string;
+  reference_no?: string | null;
+  date?: string | null;
+  excerpt: string;
+  url?: string | null;
+  relevance_score?: number;
+}
+
+export interface UrlInspectionResult {
+  url: string;
+  domain: string;
+  is_apk: boolean;
+  is_shortener: boolean;
+  is_impersonating: boolean;
+  impersonated_target?: string | null;
+  risk_level: string; // 'high' | 'medium' | 'low' | 'safe'
+  reason: string;
+  redirect_warning?: string | null;
+}
+
+export interface ClaimVerification {
+  claim: string;
+  verdict: VerificationVerdict;
+  confidence: number;
+  why_verdict: string;
+  retrieved_evidence: RAGEvidenceDoc[];
+}
 
 export interface ClaimItem {
   claim: string;
@@ -76,13 +108,16 @@ export interface AnalysisResult {
   original_content: string;
   overall_status: OverallStatus;
   status_label: string;
+  verdict?: VerificationVerdict | null;
   summary: string;
   warning_signals_count: number;
   claims: ClaimItem[];
+  verified_claims?: ClaimVerification[];
   signals: WarningSignal[];
   intent_breakdown?: IntentBreakdown | null;
   sebi_check?: SebiCheckResult | null;
   regulatory_grounding?: RegulatoryGrounding | null;
+  url_inspection?: UrlInspectionResult | null;
   simple_explanation: SimpleExplanation;
   verification_items: string[];
   before_you_act: string;

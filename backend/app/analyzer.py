@@ -22,6 +22,7 @@ from dotenv import load_dotenv
 from .schemas import (
     AnalysisResult,
     OverallStatus,
+    VerificationVerdict,
     SeverityLevel,
     ClaimType,
     ClaimStatus,
@@ -45,6 +46,8 @@ from .demo_data import TEST_CASES_DATA, build_analysis_result_from_test_case
 from .multilingual import build_multilingual_explanation
 from .classifier import inspect_sebi_registration, classify_intent_and_evidence
 from .datasets.sebi_nsdl_advisories import match_regulatory_grounding
+from .rag.retriever import rag_retriever
+from .url_inspector import inspect_content_urls
 
 # Load environment variables
 load_dotenv()
@@ -241,19 +244,38 @@ class AnalysisEngine:
         )
         reg_grounding = match_regulatory_grounding(content)
 
+        # Hybrid RAG Evidence Verification & URL Threat Inspection
+        url_insp = inspect_content_urls(content)
+        verified_claims = [rag_retriever.verify_claim(c.claim, context=content) for c in formatted_claims]
+
+        # 5-Tier authoritative verdict taxonomy
+        if any(vc.verdict == VerificationVerdict.OUTDATED for vc in verified_claims):
+            verdict = VerificationVerdict.OUTDATED
+        elif overall_status_val == OverallStatus.POTENTIALLY_MISLEADING or (url_insp and url_insp.risk_level == "high") or any(vc.verdict == VerificationVerdict.FALSE for vc in verified_claims):
+            verdict = VerificationVerdict.FALSE
+        elif overall_status_val == OverallStatus.NEEDS_VERIFICATION or any(vc.verdict == VerificationVerdict.MISLEADING for vc in verified_claims):
+            verdict = VerificationVerdict.MISLEADING
+        elif overall_status_val == OverallStatus.NO_OBVIOUS_SIGNALS and all(vc.verdict == VerificationVerdict.TRUE for vc in verified_claims):
+            verdict = VerificationVerdict.TRUE
+        else:
+            verdict = VerificationVerdict.UNVERIFIED
+
         return AnalysisResult(
             id=f"analysis-{uuid.uuid4().hex[:8]}",
             input_type=input_type,
             original_content=content,
             overall_status=overall_status_val,
             status_label=synthesis.get("status_label", "Needs Verification"),
+            verdict=verdict,
             summary=synthesis.get("summary", "Summary of financial claims in message."),
             warning_signals_count=len(formatted_signals),
             claims=formatted_claims,
+            verified_claims=verified_claims,
             signals=formatted_signals,
             intent_breakdown=intent,
             sebi_check=sebi_res,
             regulatory_grounding=reg_grounding,
+            url_inspection=url_insp,
             simple_explanation=multilingual_expl,
             verification_items=synthesis.get("verification_items", [
                 "Is the organisation genuine?",
@@ -392,19 +414,38 @@ class AnalysisEngine:
         intent, claims = classify_intent_and_evidence(content, overall_status, signals, claims)
         reg_grounding = match_regulatory_grounding(content)
 
+        # Hybrid RAG Evidence Verification & URL Threat Inspection
+        url_insp = inspect_content_urls(content)
+        verified_claims = [rag_retriever.verify_claim(c.claim, context=content) for c in claims]
+
+        # 5-Tier authoritative verdict taxonomy
+        if any(vc.verdict == VerificationVerdict.OUTDATED for vc in verified_claims):
+            verdict = VerificationVerdict.OUTDATED
+        elif overall_status == OverallStatus.POTENTIALLY_MISLEADING or (url_insp and url_insp.risk_level == "high") or any(vc.verdict == VerificationVerdict.FALSE for vc in verified_claims):
+            verdict = VerificationVerdict.FALSE
+        elif overall_status == OverallStatus.NEEDS_VERIFICATION or any(vc.verdict == VerificationVerdict.MISLEADING for vc in verified_claims):
+            verdict = VerificationVerdict.MISLEADING
+        elif overall_status == OverallStatus.NO_OBVIOUS_SIGNALS and verified_claims and all(vc.verdict == VerificationVerdict.TRUE for vc in verified_claims):
+            verdict = VerificationVerdict.TRUE
+        else:
+            verdict = VerificationVerdict.UNVERIFIED
+
         return AnalysisResult(
             id=f"analysis-{uuid.uuid4().hex[:8]}",
             input_type=input_type,
             original_content=content,
             overall_status=overall_status,
             status_label=status_label,
+            verdict=verdict,
             summary=f"Analysis of financial claims in submitted {input_type}.",
             warning_signals_count=len(signals),
             claims=claims,
+            verified_claims=verified_claims,
             signals=signals,
             intent_breakdown=intent,
             sebi_check=sebi_res,
             regulatory_grounding=reg_grounding,
+            url_inspection=url_insp,
             simple_explanation=simple_expl,
             verification_items=[
                 "Is the organisation genuine and registered with SEBI or RBI?",

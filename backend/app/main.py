@@ -21,6 +21,10 @@ from .schemas import (
     AnalysisResult,
     TextAnalysisRequest,
     UrlAnalysisRequest,
+    ClaimVerifyRequest,
+    ClaimVerification,
+    UrlInspectRequest,
+    UrlInspectionResult,
     ExplainRequest,
     TranslateRequest,
     SimpleExplanation,
@@ -31,6 +35,8 @@ from .ocr import extract_text_from_image_bytes
 from .analyzer import analyzer
 from .lessons import LESSONS_DB, get_all_lessons, get_lesson_for_signal
 from .demo_data import DEMO_SAMPLES, TEST_CASES_DATA
+from .rag.retriever import rag_retriever
+from .url_inspector import inspect_url
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -103,6 +109,28 @@ async def get_modus_operandi():
     """Return curated scam modus operandi database across WhatsApp, Telegram, and YouTube."""
     from .datasets.sebi_nsdl_advisories import PLATFORM_MODUS_OPERANDI
     return PLATFORM_MODUS_OPERANDI
+
+
+@app.post("/api/verify/claim", response_model=ClaimVerification)
+async def verify_claim_endpoint(payload: ClaimVerifyRequest):
+    """Verify an individual financial claim against official SEBI/RBI/NSE/BSE regulatory records."""
+    if not payload.claim or len(payload.claim.strip()) < 3:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Claim string is too short to verify."
+        )
+    return rag_retriever.verify_claim(payload.claim)
+
+
+@app.post("/api/inspect/url", response_model=UrlInspectionResult)
+async def inspect_url_endpoint(payload: UrlInspectRequest):
+    """Inspect a URL or APK link for scams, typosquatting, shorteners, or sideloaded malware."""
+    if not payload.url or len(payload.url.strip()) < 3:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="URL is required for inspection."
+        )
+    return inspect_url(payload.url)
 
 
 

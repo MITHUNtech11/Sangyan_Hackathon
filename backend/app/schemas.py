@@ -10,6 +10,15 @@ class OverallStatus(str, Enum):
     NO_OBVIOUS_SIGNALS = "no_obvious_signals"
 
 
+class VerificationVerdict(str, Enum):
+    """5-tier authoritative verification verdict taxonomy."""
+    TRUE = "TRUE"
+    FALSE = "FALSE"
+    MISLEADING = "MISLEADING"
+    UNVERIFIED = "UNVERIFIED"
+    OUTDATED = "OUTDATED"
+
+
 class SeverityLevel(str, Enum):
     HIGH = "high"
     MEDIUM = "medium"
@@ -140,21 +149,67 @@ class RegulatoryGrounding(BaseModel):
     official_redressal_steps: List[str] = Field(default_factory=list)
 
 
+class RAGEvidenceDoc(BaseModel):
+    """Retrieved evidence document from the regulatory knowledge base."""
+    id: Optional[str] = None
+    title: str = Field(..., description="Official circular or document title.")
+    authority: str = Field(..., description="Regulator or source: SEBI, RBI, NSE, BSE, Fin-Fact, etc.")
+    reference_no: Optional[str] = Field(default=None, description="Official circular / press release number.")
+    date: Optional[str] = Field(default=None, description="Date of issuance.")
+    excerpt: str = Field(..., description="Verbatim or key excerpt explaining the regulatory stance.")
+    url: Optional[str] = Field(default=None, description="Direct URL to official circular or announcement.")
+    relevance_score: float = Field(default=0.0, description="Relevance similarity score (0.0 to 1.0).")
+
+
+class UrlInspectionResult(BaseModel):
+    """Deep inspection of detected URLs or sideloaded APK downloads."""
+    url: str = Field(..., description="Scanned URL.")
+    domain: str = Field(..., description="Extracted domain or hostname.")
+    is_apk: bool = Field(default=False, description="Whether the link downloads an APK or executable outside official app stores.")
+    is_shortener: bool = Field(default=False, description="Whether this is a URL shortener masking the destination.")
+    is_impersonating: bool = Field(default=False, description="Whether the domain mimics an official authority or bank.")
+    impersonated_target: Optional[str] = Field(default=None, description="Name of the impersonated authority/portal.")
+    risk_level: str = Field(default="low", description="Safety rating: safe, low, medium, or high.")
+    reason: str = Field(default="", description="Detailed explanation of safety findings.")
+    redirect_warning: Optional[str] = Field(default=None, description="Precautionary warning regarding link navigation.")
+
+
+class ClaimVerification(BaseModel):
+    """5-tier grounded verification for an individual financial claim."""
+    claim: str = Field(..., description="The financial claim being verified.")
+    verdict: VerificationVerdict = Field(..., description="5-tier verification verdict (TRUE, FALSE, MISLEADING, UNVERIFIED, OUTDATED).")
+    confidence: float = Field(default=0.85, description="Confidence score (0.0 to 1.0).")
+    why_verdict: str = Field(..., description="Plain-language explanation grounded in official evidence.")
+    retrieved_evidence: List[RAGEvidenceDoc] = Field(default_factory=list, description="Retrieved regulatory evidence.")
+
+
 class AnalysisResult(BaseModel):
     id: str = Field(..., description="Unique analysis identifier.")
     input_type: str = Field(..., description="Input method: image, text, or url.")
     original_content: str = Field(..., description="The raw or OCR-extracted text that was analyzed.")
     overall_status: OverallStatus = Field(..., description="High-level status classification.")
     status_label: str = Field(..., description="Display label e.g., 'Needs Caution', 'Needs Verification', 'No Obvious Warning Signals Detected'.")
+    verdict: Optional[VerificationVerdict] = Field(
+        default=None,
+        description="5-tier authoritative verification verdict (TRUE, FALSE, MISLEADING, UNVERIFIED, OUTDATED)."
+    )
     summary: str = Field(..., description="Plain summary answering 'What is this content saying?'.")
     warning_signals_count: int = Field(default=0, description="Total count of warning signals detected.")
     claims: List[ClaimItem] = Field(default_factory=list, description="Extracted financial claims.")
+    verified_claims: List[ClaimVerification] = Field(
+        default_factory=list,
+        description="Detailed verification of each claim against the regulatory RAG corpus."
+    )
     signals: List[WarningSignal] = Field(default_factory=list, description="Detected warning and manipulation signals.")
     intent_breakdown: Optional[IntentBreakdown] = Field(default=None, description="Promotion vs Education breakdown.")
     sebi_check: Optional[SebiCheckResult] = Field(default=None, description="Regulatory registration check.")
     regulatory_grounding: Optional[RegulatoryGrounding] = Field(
         default=None,
         description="Cross-referenced official SEBI & NSDL regulatory advisories and modus operandi."
+    )
+    url_inspection: Optional[UrlInspectionResult] = Field(
+        default=None,
+        description="Security inspection of any detected URLs or APK download links."
     )
     simple_explanation: SimpleExplanation = Field(..., description="Simple multi-lingual breakdown.")
     verification_items: List[str] = Field(default_factory=list, description="Checklist questions to verify before acting.")
@@ -177,6 +232,14 @@ class TextAnalysisRequest(BaseModel):
 class UrlAnalysisRequest(BaseModel):
     url: str = Field(..., description="URL containing financial content or claims.")
     language: Optional[str] = Field(default="en", description="Preferred output language: en, hi, bn, mr, te, ta, gu, ur, kn, or, ml.")
+
+
+class ClaimVerifyRequest(BaseModel):
+    claim: str = Field(..., min_length=3, description="Financial claim to verify against the regulatory knowledge base.")
+
+
+class UrlInspectRequest(BaseModel):
+    url: str = Field(..., description="URL to inspect for threats, typosquatting, and APK downloads.")
 
 
 class ExplainRequest(BaseModel):

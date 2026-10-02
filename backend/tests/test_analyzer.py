@@ -2,7 +2,7 @@
 import pytest
 from app.analyzer import analyzer
 from app.demo_data import TEST_CASES_DATA
-from app.schemas import OverallStatus, AnalysisResult, SeverityLevel
+from app.schemas import OverallStatus, AnalysisResult, SeverityLevel, VerificationVerdict
 
 
 @pytest.mark.asyncio
@@ -19,6 +19,17 @@ async def test_all_10_test_cases_schema_conformance():
             OverallStatus.NEEDS_VERIFICATION,
             OverallStatus.NO_OBVIOUS_SIGNALS
         ]
+        assert result.verdict in [
+            VerificationVerdict.TRUE,
+            VerificationVerdict.FALSE,
+            VerificationVerdict.MISLEADING,
+            VerificationVerdict.UNVERIFIED,
+            VerificationVerdict.OUTDATED
+        ]
+        assert len(result.verified_claims) > 0
+        for vc in result.verified_claims:
+            assert vc.verdict in VerificationVerdict
+            assert len(vc.why_verdict) > 0
         
         # Verify status matches expected outcome
         assert result.overall_status == tc["expected_status"], (
@@ -176,4 +187,16 @@ async def test_sangyan_track_e_sebi_and_intent_features():
     assert analysis.sebi_check.claimed_reg_number == "INH000099999"
     assert analysis.micro_lesson.everyday_analogy is not None
     assert len(analysis.micro_lesson.everyday_analogy) > 10
+
+
+@pytest.mark.asyncio
+async def test_neutral_content_verdict_is_unverified():
+    """Verify that arbitrary neutral text with no warning signals receives an UNVERIFIED verdict rather than TRUE."""
+    content = "Company ABC had a general meeting about supply chain logistics in Pune."
+    result = await analyzer.analyze_text(content)
+    assert result.overall_status == OverallStatus.NO_OBVIOUS_SIGNALS
+    assert result.verdict == VerificationVerdict.UNVERIFIED
+    assert len(result.verified_claims) > 0
+    assert result.verified_claims[0].verdict == VerificationVerdict.UNVERIFIED
+
 

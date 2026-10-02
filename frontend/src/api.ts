@@ -1,4 +1,11 @@
-import type { AnalysisResult, DemoSample, MicroLesson, TestCaseItem } from './types';
+import type {
+  AnalysisResult,
+  ClaimVerification,
+  DemoSample,
+  MicroLesson,
+  TestCaseItem,
+  UrlInspectionResult,
+} from './types';
 
 const API_BASE = '/api';
 
@@ -81,6 +88,32 @@ export async function fetchRegulatoryAdvisories(): Promise<import('./types').Reg
 export async function fetchModusOperandi(): Promise<import('./types').ModusOperandiItem[]> {
   const res = await fetch(`${API_BASE}/modus-operandi`);
   if (!res.ok) throw new Error('Failed to fetch modus operandi');
+  return res.json();
+}
+
+export async function verifyClaim(claim: string): Promise<ClaimVerification> {
+  const res = await fetch(`${API_BASE}/verify/claim`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ claim }),
+  });
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Claim verification failed.');
+  }
+  return res.json();
+}
+
+export async function inspectUrl(url: string): Promise<UrlInspectionResult> {
+  const res = await fetch(`${API_BASE}/inspect/url`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url }),
+  });
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'URL inspection failed.');
+  }
   return res.json();
 }
 
