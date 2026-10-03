@@ -179,6 +179,10 @@ export const InputSection: React.FC<InputSectionProps> = ({
         {/* Tab 2: Text Input */}
         {activeTab === 'text' && (
           <div>
+            <div className="flex items-center space-x-2 mb-2.5 text-xs font-bold text-slate-700 uppercase tracking-wider">
+              <FileText className="w-4 h-4 text-sky-600" />
+              <span>Paste Financial Message, Tip, or Chat Forward</span>
+            </div>
             <textarea
               rows={4}
               value={textInput}
@@ -195,6 +199,10 @@ export const InputSection: React.FC<InputSectionProps> = ({
         {/* Tab 3: URL Input */}
         {activeTab === 'url' && (
           <div>
+            <div className="flex items-center space-x-2 mb-2.5 text-xs font-bold text-slate-700 uppercase tracking-wider">
+              <Link2 className="w-4 h-4 text-sky-600" />
+              <span>Enter Financial Article or Social Media Link</span>
+            </div>
             <input
               type="url"
               value={urlInput}

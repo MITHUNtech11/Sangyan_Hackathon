@@ -30,7 +30,7 @@ REGULATORY_KNOWLEDGE_BASE: List[Dict[str, Any]] = [
             "investors are legally prohibited under SEBI FPI Regulations from trading through institutional "
             "sub-accounts. Unofficial APK downloads display simulated paper balances and steal deposits."
         ),
-        "url": "https://www.sebi.gov.in/enforcement/press-releases/feb-2024/sebi-cautions-investors-against-fraudulent-trading-platforms_81804.html",
+        "url": "https://www.sebi.gov.in/sebiweb/home/HomeAction.do?doListing=yes&sid=4&smid=0&ssid=0",
         "rule_verdict": "FALSE",
         "action_advice": "Never deposit funds into private accounts for 'institutional' quotas. Only trade through registered stock brokers listed on sebi.gov.in."
     },
@@ -51,7 +51,7 @@ REGULATORY_KNOWLEDGE_BASE: List[Dict[str, Any]] = [
             "upfront fees. SEBI never approves any social media group or communication channel. Registered "
             "Research Analysts (RAs) are strictly barred from guaranteeing returns, sharing profits, or managing client funds."
         ),
-        "url": "https://www.sebi.gov.in/enforcement/press-releases/may-2024/sebi-cautions-investors_83478.html",
+        "url": "https://www.sebi.gov.in/sebiweb/home/HomeAction.do?doListing=yes&sid=4&smid=0&ssid=0",
         "rule_verdict": "FALSE",
         "action_advice": "Cross-verify analyst credentials directly on sebi.gov.in. Any entity promising guaranteed returns in market-linked assets is operating illegally."
     },
@@ -72,7 +72,7 @@ REGULATORY_KNOWLEDGE_BASE: List[Dict[str, Any]] = [
             "or promising 'risk-free' automated returns. Algorithmic software cannot eliminate market risk, and marketing "
             "strategies as 'guaranteed profits' violates SEBI Code of Conduct."
         ),
-        "url": "https://www.sebi.gov.in/legal/circulars/dec-2023/prohibition-of-assured-returns_79951.html",
+        "url": "https://www.sebi.gov.in/sebiweb/home/HomeAction.do?doListing=yes&sid=1&smid=0&ssid=0",
         "rule_verdict": "FALSE",
         "action_advice": "Beware of software vendors marketing '100% win rate' bots. Trading derivatives or equities involves continuous capital risk."
     },
@@ -93,7 +93,7 @@ REGULATORY_KNOWLEDGE_BASE: List[Dict[str, Any]] = [
             "and that 'Past performance may or may not be sustained in future and is not a guarantee of future returns'. "
             "Claims representing past returns as proof of guaranteed safety or zero downside risk are deemed misleading."
         ),
-        "url": "https://www.sebi.gov.in/legal/circulars/jan-2019/categorization-and-rationalization-of-mutual-fund-schemes_41774.html",
+        "url": "https://www.sebi.gov.in/sebiweb/home/HomeAction.do?doListing=yes&sid=1&smid=0&ssid=0",
         "rule_verdict": "TRUE",
         "action_advice": "Mandatory statutory compliance disclosure. Check official Scheme Information Document (SID) and Key Information Memorandum (KIM)."
     },
@@ -114,7 +114,7 @@ REGULATORY_KNOWLEDGE_BASE: List[Dict[str, Any]] = [
             "pump the stock price and liquidity of illiquid microcaps. Once retail buyers entered on market open, "
             "the scheme promoters dumped substantial holdings at peak prices."
         ),
-        "url": "https://www.sebi.gov.in/enforcement/orders/mar-2023/interim-order-in-the-matter-of-pump-and-dump-scheme_68625.html",
+        "url": "https://www.sebi.gov.in/sebiweb/home/HomeAction.do?doListing=yes&sid=2&smid=0&ssid=0",
         "rule_verdict": "FALSE",
         "action_advice": "Never invest in unknown penny stocks based on YouTube videos. Verify all announcements directly on nseindia.com or bseindia.com."
     },
@@ -197,7 +197,7 @@ REGULATORY_KNOWLEDGE_BASE: List[Dict[str, Any]] = [
             "Investors participating in artificial volume spikes risk getting trapped when trading is suspended or shifted "
             "to Trade-for-Trade surveillance."
         ),
-        "url": "https://www.nseindia.com/invest/investor-alerts-advisories",
+        "url": "https://www.nseindia.com",
         "rule_verdict": "FALSE",
         "action_advice": "Disregard unsolicited stock recommendations received on WhatsApp or Telegram. Verify all exchange announcements on nseindia.com."
     },
@@ -238,7 +238,7 @@ REGULATORY_KNOWLEDGE_BASE: List[Dict[str, Any]] = [
             "to assert an asset is 'one of the safest investments with zero risk' as MISLEADING. Market-linked equity and hybrid funds "
             "carry systemic volatility; high past returns reflect market conditions rather than guaranteed capital protection."
         ),
-        "url": "https://www.sebi.gov.in/sebiweb/home/HomeAction.do?doListing=yes&sid=3&smid=0&ssid=2",
+        "url": "https://investor.sebi.gov.in",
         "rule_verdict": "MISLEADING",
         "action_advice": "Evaluate standard deviation, riskometer ratings, and multi-year rolling returns rather than a single year's performance."
     },

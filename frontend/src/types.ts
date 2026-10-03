@@ -136,7 +136,7 @@ export interface DemoSample {
   expected_status: OverallStatus;
 }
 
-export type NavigationView = 'analyzer' | 'demos' | 'lessons' | 'regulatory';
+export type NavigationView = 'analyzer' | 'demos' | 'regulatory';
 
 export interface TestCaseItem {
   id: string;

@@ -5,7 +5,6 @@ import { InputSection } from './components/InputSection';
 import { AnalyzingOverlay } from './components/AnalyzingOverlay';
 import { ResultView } from './components/ResultView';
 import { DemoPage } from './components/DemoPage';
-import { LessonsPage } from './components/LessonsPage';
 import { RegulatoryWatchPage } from './components/RegulatoryWatchPage';
 import type {
   AnalysisResult,
@@ -20,7 +19,7 @@ import {
   analyzeUrl,
   deleteAnalysis,
 } from './api';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Search, ShieldCheck, Languages } from 'lucide-react';
 import { TRANSLATIONS } from './i18n/translations';
 
 export const App: React.FC = () => {
@@ -156,8 +155,6 @@ export const App: React.FC = () => {
             onBackToAnalyzer={() => handleNavigate('analyzer')}
             isLoading={isLoading}
           />
-        ) : currentView === 'lessons' ? (
-          <LessonsPage onBackToAnalyzer={() => handleNavigate('analyzer')} />
         ) : currentView === 'regulatory' ? (
           <RegulatoryWatchPage onBackToAnalyzer={() => handleNavigate('analyzer')} />
         ) : (
@@ -197,36 +194,42 @@ export const App: React.FC = () => {
 
             {/* 3 Pillar Value Badges (Capture -> Understand -> Check -> Explain -> Verify -> Learn) */}
             <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6">
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-start">
-                <div className="p-2.5 rounded-xl bg-sky-50 text-sky-600 mb-3 font-bold text-xs uppercase">
-                  {t.valueCards.card1Badge}
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-start hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-sky-50 text-sky-700 mb-3 font-bold text-xs uppercase tracking-wider border border-sky-100">
+                  <Search className="w-3.5 h-3.5 text-sky-600" />
+                  <span>{t.valueCards.card1Badge}</span>
                 </div>
-                <h4 className="text-sm font-bold text-slate-900 mb-1">
-                  {t.valueCards.card1Title}
+                <h4 className="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+                  <Search className="w-4 h-4 text-sky-600 shrink-0" />
+                  <span>{t.valueCards.card1Title}</span>
                 </h4>
                 <p className="text-xs text-slate-500 leading-relaxed">
                   {t.valueCards.card1Desc}
                 </p>
               </div>
 
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-start">
-                <div className="p-2.5 rounded-xl bg-amber-50 text-amber-600 mb-3 font-bold text-xs uppercase">
-                  {t.valueCards.card2Badge}
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-start hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-50 text-amber-700 mb-3 font-bold text-xs uppercase tracking-wider border border-amber-100">
+                  <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
+                  <span>{t.valueCards.card2Badge}</span>
                 </div>
-                <h4 className="text-sm font-bold text-slate-900 mb-1">
-                  {t.valueCards.card2Title}
+                <h4 className="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>{t.valueCards.card2Title}</span>
                 </h4>
                 <p className="text-xs text-slate-500 leading-relaxed">
                   {t.valueCards.card2Desc}
                 </p>
               </div>
 
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-start">
-                <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 mb-3 font-bold text-xs uppercase">
-                  {t.valueCards.card3Badge}
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-start hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-700 mb-3 font-bold text-xs uppercase tracking-wider border border-emerald-100">
+                  <Languages className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>{t.valueCards.card3Badge}</span>
                 </div>
-                <h4 className="text-sm font-bold text-slate-900 mb-1">
-                  {t.valueCards.card3Title}
+                <h4 className="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+                  <Languages className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>{t.valueCards.card3Title}</span>
                 </h4>
                 <p className="text-xs text-slate-500 leading-relaxed">
                   {t.valueCards.card3Desc}

@@ -17,12 +17,12 @@ import {
   Share2,
   Check,
   Building2,
-  Lightbulb,
   PieChart,
   ArrowLeft,
   Sparkles,
   FileText,
   ListChecks,
+  ChevronDown,
 } from 'lucide-react';
 import type { AnalysisResult, SupportedLanguage } from '../types';
 import { SUPPORTED_LANGUAGES, getLanguageByCode } from '../i18n/languages';
@@ -64,8 +64,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
   // Checked state for verification checklist items
   const [checkedItems, setCheckedItems] = useState<Record<number, boolean>>({});
-  // Expandable lesson state
-  const [lessonExpanded, setLessonExpanded] = useState(false);
   // Speech synthesis state
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   // Copied share card notification
@@ -374,8 +372,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
               : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
           }`}
         >
-          <Lightbulb className="w-4 h-4 text-amber-500" />
-          <span>1. Plain Advice & Analogy</span>
+          <CheckCircle2 className="w-4 h-4 text-sky-500" />
+          <span>1. Plain Advice & Action</span>
         </button>
 
         <button
@@ -403,7 +401,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         </button>
       </div>
 
-      {/* 3. TAB 1: PLAIN ADVICE & EVERYDAY ANALOGY */}
+      {/* 3. TAB 1: PLAIN ADVICE & ACTION */}
       {activeTab === 'verdict' && (
         <div className="space-y-5 animate-in fade-in duration-150">
           {/* Plain Language Explanation Card */}
@@ -455,71 +453,80 @@ export const ResultView: React.FC<ResultViewProps> = ({
               </div>
             </div>
 
-            <p className="text-sm sm:text-base text-slate-800 leading-relaxed font-medium">
-              {getExplanationText()}
-            </p>
+            {/* Scannable Bullet Points for Tier-2/3 Retail Investors */}
+            <div className="space-y-2.5">
+              {getExplanationText()
+                .split(/(?<=[.?!])\s+/)
+                .map((s) => s.trim())
+                .filter(Boolean)
+                .map((sentence, sIdx) => (
+                  <div
+                    key={sIdx}
+                    className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-800 leading-relaxed font-medium bg-slate-50/70 p-2.5 rounded-xl border border-slate-100"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-sky-500 mt-2 shrink-0" />
+                    <span>{sentence}</span>
+                  </div>
+                ))}
+            </div>
           </div>
 
           {/* Before You Act (Friction & Safety Warning) */}
-          <div className="bg-gradient-to-r from-rose-500 to-amber-600 text-white rounded-2xl p-5 shadow-sm">
-            <div className="flex items-center space-x-2 text-xs font-extrabold uppercase tracking-wider mb-1.5 text-white/90">
+          <div className="bg-gradient-to-r from-rose-500 to-amber-600 text-white rounded-2xl p-4 sm:p-5 shadow-sm">
+            <div className="flex items-center space-x-2 text-xs font-extrabold uppercase tracking-wider mb-1 text-white/90">
               <AlertTriangle className="w-4 h-4 text-amber-200" />
               <span>{t.beforeYouAct}</span>
             </div>
-            <p className="text-sm sm:text-base font-bold text-white leading-snug">
+            <p className="text-xs sm:text-sm font-bold text-white leading-snug">
               {result.before_you_act}
             </p>
           </div>
 
-          {/* Everyday Bharat Analogy Card */}
-          {result.micro_lesson && (
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center space-x-2 text-xs font-extrabold uppercase tracking-wider text-amber-700">
-                  <Lightbulb className="w-4 h-4 text-amber-600" />
-                  <span>Everyday Bharat Analogy (रोजमर्रा का उदाहरण / எளிய உவமை)</span>
+          {/* Quick Action Checklist (Tap to Verify) - Moved to Tab 1 for immediate practical action */}
+          {result.verification_items && result.verification_items.length > 0 && (
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <CheckSquare className="w-4 h-4 text-emerald-600" />
+                  <h3 className="text-xs sm:text-sm font-bold text-slate-900">
+                    Quick Verification Checklist (Tap to Verify)
+                  </h3>
                 </div>
-                <span className="text-[11px] font-semibold text-slate-400">
-                  Topic: {result.micro_lesson.title}
+                <span className="text-[10px] font-bold text-slate-400">
+                  {Object.values(checkedItems).filter(Boolean).length} of {result.verification_items.length} verified
                 </span>
               </div>
+              <p className="text-[11px] text-slate-500 mb-3">
+                Check these off before trusting or sending any money:
+              </p>
 
-              {result.micro_lesson.everyday_analogy && (
-                <div className="bg-amber-50/70 border border-amber-200/80 rounded-xl p-4 mb-4 text-xs sm:text-sm text-amber-950 font-medium italic leading-relaxed">
-                  "{result.micro_lesson.everyday_analogy}"
-                </div>
-              )}
-
-              {/* Remember Rule */}
-              <div className="bg-indigo-50 border-l-4 border-indigo-500 p-3.5 rounded-r-xl mb-3 text-xs sm:text-sm font-bold text-indigo-950">
-                <span className="text-indigo-800 font-extrabold uppercase text-[10px] block mb-0.5">
-                  Golden Rule to Remember:
-                </span>
-                "{result.micro_lesson.remember}"
+              <div className="space-y-2">
+                {result.verification_items.map((item, idx) => {
+                  const isChecked = !!checkedItems[idx];
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => toggleCheck(idx)}
+                      className={`w-full p-2.5 rounded-xl border text-left flex items-start space-x-2.5 transition-colors cursor-pointer ${
+                        isChecked
+                          ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
+                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100/70'
+                      }`}
+                    >
+                      <div className="mt-0.5 shrink-0">
+                        {isChecked ? (
+                          <CheckSquare className="w-4 h-4 text-emerald-600" />
+                        ) : (
+                          <Square className="w-4 h-4 text-slate-400" />
+                        )}
+                      </div>
+                      <span className={`text-xs leading-relaxed ${isChecked ? 'line-through opacity-75' : 'font-medium'}`}>
+                        {item}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
-
-              {/* Expandable details */}
-              {lessonExpanded ? (
-                <div className="mt-3 p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs text-slate-700 leading-relaxed space-y-1.5 animate-in fade-in">
-                  <div className="font-bold text-slate-800 text-[11px] uppercase tracking-wider">
-                    Full Lesson Insight:
-                  </div>
-                  <p>{result.micro_lesson.learn_more}</p>
-                  <button
-                    onClick={() => setLessonExpanded(false)}
-                    className="text-xs font-bold text-sky-600 hover:text-sky-800 pt-1 block cursor-pointer"
-                  >
-                    Hide Details
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setLessonExpanded(true)}
-                  className="text-xs font-bold text-sky-600 hover:text-sky-800 pt-1 block cursor-pointer"
-                >
-                  Learn More About This Protection Rule →
-                </button>
-              )}
             </div>
           )}
         </div>
@@ -574,42 +581,48 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       </div>
 
                       {vc.retrieved_evidence && vc.retrieved_evidence.length > 0 && (
-                        <div className="space-y-2 pt-1">
-                          <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
-                            Retrieved Official Regulatory Excerpts:
-                          </div>
-                          {vc.retrieved_evidence.map((ev, eIdx) => (
-                            <div key={eIdx} className="bg-sky-50/70 border border-sky-200 rounded-xl p-3 text-xs space-y-1.5">
-                              <div className="flex items-center justify-between">
-                                <span className="font-bold text-sky-950">
-                                  {ev.authority} {ev.reference_no ? `• ${ev.reference_no}` : ''}
-                                </span>
-                                {ev.relevance_score !== undefined && (
-                                  <span className="text-[10px] font-bold text-sky-700 bg-white px-2 py-0.5 rounded border border-sky-200">
-                                    Match: {Math.round(ev.relevance_score * 100)}%
+                        <details className="group pt-1">
+                          <summary className="text-[11px] font-bold text-sky-700 hover:text-sky-900 cursor-pointer flex items-center justify-between select-none py-1.5 px-2.5 bg-sky-50/70 hover:bg-sky-100/60 rounded-lg border border-sky-200 transition-colors">
+                            <div className="flex items-center space-x-1.5">
+                              <FileText className="w-3.5 h-3.5 text-sky-600" />
+                              <span>View Official Regulatory Circular Excerpt ({vc.retrieved_evidence.length})</span>
+                            </div>
+                            <ChevronDown className="w-3.5 h-3.5 text-sky-500 transition-transform group-open:rotate-180" />
+                          </summary>
+                          <div className="space-y-2 pt-2">
+                            {vc.retrieved_evidence.map((ev, eIdx) => (
+                              <div key={eIdx} className="bg-sky-50/70 border border-sky-200 rounded-xl p-3 text-xs space-y-1.5">
+                                <div className="flex items-center justify-between">
+                                  <span className="font-bold text-sky-950">
+                                    {ev.authority} {ev.reference_no ? `• ${ev.reference_no}` : ''}
                                   </span>
+                                  {ev.relevance_score !== undefined && (
+                                    <span className="text-[10px] font-bold text-sky-700 bg-white px-2 py-0.5 rounded border border-sky-200">
+                                      Match: {Math.round(ev.relevance_score * 100)}%
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="font-semibold text-slate-800 text-[11px]">{ev.title}</div>
+                                <p className="text-slate-700 text-[11px] italic leading-relaxed">
+                                  "{ev.excerpt}"
+                                </p>
+                                {ev.url && (
+                                  <div className="pt-1 flex justify-end">
+                                    <a
+                                      href={ev.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center space-x-1 text-[11px] font-bold text-sky-700 hover:text-sky-900 underline"
+                                    >
+                                      <span>Verify on Official {ev.authority || 'Regulatory'} Portal</span>
+                                      <ExternalLink className="w-3 h-3" />
+                                    </a>
+                                  </div>
                                 )}
                               </div>
-                              <div className="font-semibold text-slate-800 text-[11px]">{ev.title}</div>
-                              <p className="text-slate-700 text-[11px] italic leading-relaxed">
-                                "{ev.excerpt}"
-                              </p>
-                              {ev.url && (
-                                <div className="pt-1 flex justify-end">
-                                  <a
-                                    href={ev.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center space-x-1 text-[11px] font-bold text-sky-700 hover:text-sky-900 underline"
-                                  >
-                                    <span>View Official Circular</span>
-                                    <ExternalLink className="w-3 h-3" />
-                                  </a>
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
+                            ))}
+                          </div>
+                        </details>
                       )}
                     </div>
                   );
@@ -960,49 +973,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
               </div>
             )}
           </div>
-
-          {/* Interactive Investor Checklist */}
-          {result.verification_items && result.verification_items.length > 0 && (
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-              <div className="flex items-center space-x-2 mb-2">
-                <CheckSquare className="w-5 h-5 text-emerald-600" />
-                <h3 className="text-sm font-bold text-slate-900">
-                  Investor Due Diligence Checklist
-                </h3>
-              </div>
-              <p className="text-xs text-slate-500 mb-4">
-                Tick these items off to verify this financial claim independently before investing.
-              </p>
-
-              <div className="space-y-2.5">
-                {result.verification_items.map((item, idx) => {
-                  const isChecked = !!checkedItems[idx];
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => toggleCheck(idx)}
-                      className={`w-full p-3 rounded-xl border text-left flex items-start space-x-3 transition-colors cursor-pointer ${
-                        isChecked
-                          ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
-                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100/70'
-                      }`}
-                    >
-                      <div className="mt-0.5 shrink-0">
-                        {isChecked ? (
-                          <CheckSquare className="w-4 h-4 text-emerald-600" />
-                        ) : (
-                          <Square className="w-4 h-4 text-slate-400" />
-                        )}
-                      </div>
-                      <span className={`text-xs leading-relaxed ${isChecked ? 'line-through opacity-80' : 'font-medium'}`}>
-                        {item}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
 
           {/* Uncertainty Limits */}
           {result.uncertainty && result.uncertainty.length > 0 && (

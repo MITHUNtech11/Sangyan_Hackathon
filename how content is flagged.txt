@@ -1,0 +1,85 @@
+ In SANGYAN, labeling text as Danger (High Risk / False), Misleading (Caution / Needs Verification), or Safe (Authentic / True) is governed by a multi-layered, deterministic    
+  + AI intelligence pipeline.
+
+  Rather than relying on vague sentiment or simple keyword filters, the system evaluates content against real SEBI/RBI regulations, psychological fraud tactics, and official     
+  circulars.
+  ──────
+  ### The Decision Pipeline at a Glance
+
+  │ Diagram exceeds terminal width (257 > 177 cols)
+  │ Displayed as code block. Widen terminal to view inline.
+
+    flowchart TD
+        A["Raw Financial Message (Text, Voice, or OCR)"] --> B["Stage 1: Atomic Claim Extraction"]
+        B --> C["Stage 2: 5-Pillar Red Flag & Intent Analysis"]
+        B --> D["Stage 3: Hybrid RAG Search (SEBI/RBI Circulars)"]
+        A --> E["Stage 4: SEBI Regex & URL Phishing Check"]
+
+        C --> F{"Decision Matrix"}
+        D --> F
+        E --> F
+
+        F -->|"Prohibited Promise / Fake SEBI / Upfront UPI / High-Risk URL"| Red["🔴 DANGER (High Risk / FALSE)"]
+        F -->|"Cherry-picked Past Gains / Urgency / Missing Disclaimers"| Yellow["🟡 MISLEADING (Caution / NEEDS_VERIFICATION)"]
+        F -->|"Mandatory Risk Warnings / Genuine Investor Education"| Green["🟢 SAFE (Authentic / TRUE)"]
+  ──────
+  ### 1. 🔴 How Content is Labeled as DANGER / HIGH RISK (FALSE / POTENTIALLY_MISLEADING)
+
+  Content is immediately classified as DANGER if it triggers any high-severity regulatory violation or confirmed fraud pattern:
+
+  1. Guaranteed Returns on Market Assets:
+      • SEBI Regulation: Regulated entities (advisers, brokers, analysts) are legally prohibited by SEBI from assuring or guaranteeing fixed returns on equities, mutual funds,   
+      or derivatives.
+      • Trigger words: "Guaranteed 40% monthly", "Assured returns", "Zero risk profit".
+  2. Deceptive Regulatory Claims (Fake SEBI Endorsement):
+      • Checked via inspect_sebi_registration(). SEBI registers entities, but never approves specific schemes, trading tips, or Telegram channels. Claims like "100% SEBI
+      approved Telegram" are instantly flagged as false.
+  3. Institutional Sub-Account Scams:
+      • Refuted directly by SEBI Advisory PR No. 04/2024. Indian retail investors are legally barred from operating under FPI institutional sub-accounts or WhatsApp VIP quotas.  
+  4. Suspicious Payment & Upfront Demands:
+      • Requests to transfer money to personal UPI IDs (@okhdfc), payment for "VIP group activation", or crypto-doubling bots (RBI Fraud Warning).
+  5. High-Risk Phishing URLs:
+      • The url_inspector.py evaluates domains against deceptive typosquatting, shorteners, and IP-based links.
+
+  ──────
+  ### 2. 🟡 How Content is Labeled as MISLEADING / CAUTION (MISLEADING / NEEDS_VERIFICATION)
+
+  Content is classified as MISLEADING when claims are partially true but deliberately omit risks or exploit psychological manipulation:
+
+  1. Selective / Cherry-Picked Past Performance:
+      • Presenting a past bull-run return (e.g., "Fund gave 25% last year") as proof that it is "100% safe" or "the safest asset" without mandatory SEBI risk disclaimers.        
+  2. Artificial Scarcity & Urgency Tactics:
+      • Detected using the Psychological Manipulation Pillar in taxonomy.py:
+          • "Only 5 slots left in our VIP group"
+          • "Act within 2 hours before closing"
+
+  3. Promotion vs. Education Intent Score:
+      • Evaluated by classify_intent_and_evidence(). If content has a Promotion Score > 50% and relies on unverified assertions, it is flagged for caution.
+  4. Unverified Claims:
+      • Claims made by third parties with no verifiable SEBI registration number (INH/INA) or audited financial filing.
+
+  ──────
+  ### 3. 🟢 How Content is Labeled as SAFE / AUTHENTIC (TRUE / NO_OBVIOUS_SIGNALS)
+
+  Content is labeled as SAFE only when it meets strict regulatory standards:
+
+  1. Mandatory Statutory Risk Disclosures:
+      • Explicitly includes standard regulatory caveats: "Mutual fund investments are subject to market risks, read all scheme-related documents carefully" or "Past
+      performance does not guarantee future results".
+  2. Zero Manipulative Red Flags:
+      • No guaranteed return promises, no pressure tactics, no private UPI requests, and no deceptive URLs.
+  3. RAG Ground Truth Match:
+      • The HybridRAGRetriever verifies that the text matches genuine advisory and educational bulletins published by SEBI, RBI, NSE, or BSE.
+
+  ──────
+  ### The Dual Intelligence Engine Behind the Labels
+
+  To ensure 100% reliability during demos and hackathon evaluations, SANGYAN uses a two-tier evaluation system in analyzer.py:125-290:
+
+  1. Live Gemini 2.5 Flash Pipeline:
+      • Stage 1: Extracts individual atomic claims from the text.
+      • Stage 2: Detects red flags against the 5-Pillar Regulatory Taxonomy.
+      • Stage 3: Synthesizes multilingual explanations and action items.
+  2. Deterministic Offline RAG & Rule Engine:
+      • If offline or during latency spikes, the system executes BM25 keyword + semantic concept scoring against indexed regulatory circulars and SEBI regex patterns. It never   
+      hallucinates a verdict.

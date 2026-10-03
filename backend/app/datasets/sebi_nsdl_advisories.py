@@ -29,7 +29,7 @@ OFFICIAL_ADVISORIES: List[RegulatoryAdvisory] = [
             "Directing deposits into personal or current bank accounts of unrelated private entities"
         ],
         official_action_advice="Resident Indians cannot access markets via the FPI route. Only trade through registered brokers listed on sebi.gov.in. Never deposit funds into individual bank accounts.",
-        source_url="https://www.sebi.gov.in/enforcement/press-releases/feb-2024/sebi-cautions-investors-against-fraudulent-trading-platforms_81804.html"
+        source_url="https://www.sebi.gov.in/sebiweb/home/HomeAction.do?doListing=yes&sid=4&smid=0&ssid=0"
     ),
     RegulatoryAdvisory(
         id="sebi-pr-07-2024",
@@ -46,7 +46,7 @@ OFFICIAL_ADVISORIES: List[RegulatoryAdvisory] = [
             "Sharing cropped or inspect-element manipulated profit & loss (P&L) screenshots"
         ],
         official_action_advice="SEBI-registered Research Analysts (RAs) are legally barred from assuring returns or executing trades. Cross-verify registration numbers on sebi.gov.in before paying any advisory fees.",
-        source_url="https://www.sebi.gov.in/enforcement/press-releases/may-2024/sebi-cautions-investors_83478.html"
+        source_url="https://www.sebi.gov.in/sebiweb/home/HomeAction.do?doListing=yes&sid=4&smid=0&ssid=0"
     ),
     RegulatoryAdvisory(
         id="sebi-cir-algo-2023",
@@ -62,7 +62,7 @@ OFFICIAL_ADVISORIES: List[RegulatoryAdvisory] = [
             "Selling unverified automated software licenses with promises of passive stock income"
         ],
         official_action_advice="Algorithmic trading carries market risk. Any provider promising 'guaranteed' or 'risk-free' algo execution is in direct breach of SEBI regulations.",
-        source_url="https://www.sebi.gov.in/legal/circulars/dec-2023/prohibition-of-assured-returns_79951.html"
+        source_url="https://www.sebi.gov.in/sebiweb/home/HomeAction.do?doListing=yes&sid=1&smid=0&ssid=0"
     ),
     RegulatoryAdvisory(
         id="nsdl-advisory-demat-2024",
@@ -78,7 +78,7 @@ OFFICIAL_ADVISORIES: List[RegulatoryAdvisory] = [
             "Requests to transfer share purchase funds to UPI IDs of individuals instead of Clearing Corporations"
         ],
         official_action_advice="Check actual Demat holdings only via NSDL IDEAS (eservices.nsdl.com) or monthly Consolidated Account Statements (CAS). Never trust WhatsApp share allocation receipts.",
-        source_url="https://nsdl.co.in/investor-safety.php"
+        source_url="https://investor.sebi.gov.in"
     ),
     RegulatoryAdvisory(
         id="nsdl-pooling-ban",
@@ -94,7 +94,7 @@ OFFICIAL_ADVISORIES: List[RegulatoryAdvisory] = [
             "Refusal to credit bought shares directly to the investor's individual 16-digit Demat ID"
         ],
         official_action_advice="Every share you buy must be credited directly to your own DP/Demat account. Never participate in pooled trading accounts.",
-        source_url="https://nsdl.co.in/investor-protection.php"
+        source_url="https://investor.sebi.gov.in"
     ),
     RegulatoryAdvisory(
         id="sebi-pump-dump-youtube",
@@ -110,7 +110,7 @@ OFFICIAL_ADVISORIES: List[RegulatoryAdvisory] = [
             "Urgent call to buy immediately at market open before the stock hits upper circuit"
         ],
         official_action_advice="Verify corporate announcements exclusively on official BSE (bseindia.com) and NSE (nseindia.com) company filing portals before acting on YouTube recommendations.",
-        source_url="https://www.sebi.gov.in/enforcement/orders/mar-2023/interim-order-in-the-matter-of-pump-and-dump-scheme_68625.html"
+        source_url="https://www.sebi.gov.in/sebiweb/home/HomeAction.do?doListing=yes&sid=2&smid=0&ssid=0"
     )
 ]
 
